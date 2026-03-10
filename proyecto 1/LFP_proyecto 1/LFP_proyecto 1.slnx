@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="LFP_proyecto 1/LFP_proyecto 1.vcxproj" />
+</Solution>
