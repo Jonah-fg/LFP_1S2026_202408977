@@ -4,28 +4,48 @@
 using namespace std;
 
 enum class TokenType {
+    // --- Palabras Reservadas (Secciones y Elementos) ---
     HOSPITAL,
-    PACIENTES,
-    MEDICOS,
-    CITAS,
-    DIAGNOSTICOS,
+    PACIENTES,      
+    MEDICOS,       
+    CITAS,          
+    DIAGNOSTICOS,   
+    PACIENTE,       
+    MEDICO,         
+    CITA,           
+    DIAGNOSTICO,    
 
-    PACIENTE,
-    MEDICO,
-    CITA,
-    DIAGNOSTICO,
+    // --- Literales y Valores ---
+    CADENA,         
+    NUMERO,         
+    FECHA,          
+    HORA,           
+    CODIGO_ID,      
 
-    CADENA,
-    ENTERO,
+    // --- Enumeraciones (Especialidades) ---
+    CARDIOLOGIA,
+    NEUROLOGIA,
+    PEDIATRIA,
+    CIRUGIA,
+    MEDICINA_GENERAL,
+    ONCOLOGIA,
 
-    LLAVE_ABRE,
-    LLAVE_CIERRA,
-    CORCHETE_ABRE,
-    CORCHETE_CIERRA,
-    DOS_PUNTOS,
-    COMA,
-    PUNTO_COMA,
+    // --- Enumeraciones (Dosis) ---
+    DIARIA,
+    CADA_8_HORAS,
+    CADA_12_HORAS,
+    SEMANAL,
 
+    // --- -----  Símbolos ---
+    LLAVE_ABRE,         
+    LLAVE_CIERRA,       
+    CORCHETE_ABRE,      
+    CORCHETE_CIERRA,    
+    DOS_PUNTOS,         
+    COMA,               
+    PUNTO_COMA,         
+
+    // --- Especiales ---
     END_OF_FILE,
     ERROR
 };
@@ -39,7 +59,6 @@ public:
     int columna;
 
     Token(TokenType type, string lexema, int linea, int columna);
-
 };
-
+string tokenTypeToString(TokenType type);
 #endif
