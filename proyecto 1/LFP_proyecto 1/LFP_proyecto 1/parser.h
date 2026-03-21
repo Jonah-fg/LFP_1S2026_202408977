@@ -13,7 +13,6 @@ class Parser {
 private:
     vector<Token> tokens;
     int posicionActual;
-    vector<string> erroresSintacticos;
 
     Token tokenActual();
     Token siguienteToken();
@@ -22,6 +21,7 @@ private:
 
 public:
     Parser(vector<Token> tokens);
+    vector<string> erroresSintacticos;
 
     // Métodos para parsear cada sección
     bool parsearHospital();

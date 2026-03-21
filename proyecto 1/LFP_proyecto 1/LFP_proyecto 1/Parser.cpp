@@ -48,6 +48,11 @@ bool Parser::parsearHospital(){
     while (posicionActual< tokens.size() && tokenActual().type !=TokenType::LLAVE_CIERRA) {
         Token actual=tokenActual();
 
+        if (actual.type==TokenType::COMA) { //cambio
+            siguienteToken();
+            continue;
+        }
+
         switch (actual.type){
 
         case TokenType::PACIENTES:
@@ -78,7 +83,7 @@ bool Parser::parsearHospital(){
             if (!encontreCitas){
                 encontreCitas =true;
                 siguienteToken();
-                //parsearCitas();
+                parsearCitas();
             }
             else {
                 reportarError("Sección CITAS duplicada", actual);
@@ -90,7 +95,7 @@ bool Parser::parsearHospital(){
             if (!encontreDiagnosticos) {
                 encontreDiagnosticos=true;
                 siguienteToken();
-                //parsearDiagnosticos();
+                parsearDiagnosticos();
             }
             else{
                 reportarError("Sección DIAGNOSTICOS duplicada", actual);
@@ -146,12 +151,13 @@ void Parser::parsearPacientes(){
                     bool encontreTipoSangre= false;
 
                     while (tokenActual().type!=TokenType::CORCHETE_CIERRA){
-                        if (tokenActual().type==TokenType::CADENA && tokenActual().lexema=="edad"){
+						if (tokenActual().type == TokenType::IDENTIFICADOR && tokenActual().lexema == "edad") { //cambio
                             siguienteToken();
 
                             if (coincidir(TokenType::DOS_PUNTOS)){
                                 if (tokenActual().type==TokenType::NUMERO){
                                     edad=stoi(tokenActual().lexema);
+                                    encontreEdad =true; //cambio
                                     siguienteToken();
                                 }
                                 else {
@@ -159,7 +165,7 @@ void Parser::parsearPacientes(){
                                 }
                             }
                         }
-                        else if(tokenActual().type==TokenType::CADENA && tokenActual().lexema=="tipo_sangre"){
+						else if (tokenActual().type == TokenType::IDENTIFICADOR && tokenActual().lexema == "tipo_sangre") { //cambio
                             siguienteToken();
 
                             if (coincidir(TokenType::DOS_PUNTOS)) {
@@ -269,7 +275,7 @@ void Parser::parsearMedicos() {
                             siguienteToken();
 
                             if (coincidir(TokenType::DOS_PUNTOS)) {
-                                if (tokenActual().type == TokenType::CODIGO_ID) {
+                                if (tokenActual().type == TokenType::CADENA){ //cambio
                                     codigo = tokenActual().lexema;
                                     encontreCodigo = true;
                                     siguienteToken();
@@ -327,7 +333,258 @@ void Parser::parsearMedicos() {
     cout << " Total médicos encontrados: " << medicos.size() << endl;
 }
 
+
+void Parser::parsearCitas() {
+    cout << "\n--- Parseando CITAS ---" << endl;
+
+    if (!coincidir(TokenType::LLAVE_ABRE)) {
+        reportarError("Se esperaba '{' después de CITAS", tokenActual());
+        return;
+    }
+
+    while (tokenActual().type != TokenType::LLAVE_CIERRA && tokenActual().type != TokenType::END_OF_FILE) {
+
+        if (tokenActual().type == TokenType::CITA) {
+            siguienteToken();
+            if (!coincidir(TokenType::DOS_PUNTOS)) {
+                reportarError("Se esperaba ':' después de cita", tokenActual());
+                continue;
+            }
+
+            if (tokenActual().type == TokenType::CADENA) {
+                string nombrePaciente = tokenActual().lexema;
+                int lineaPaciente = tokenActual().linea;
+                siguienteToken();
+
+                if (tokenActual().type == TokenType::IDENTIFICADOR && tokenActual().lexema == "con") { //cambio
+                    siguienteToken();
+
+                    if (tokenActual().type == TokenType::CADENA) {
+                        string nombreMedico = tokenActual().lexema;
+                        siguienteToken();
+
+                        if (coincidir(TokenType::CORCHETE_ABRE)) {
+                            string fecha;
+                            string hora;
+                            int lineaFecha = 0;
+                            int lineaHora = 0;
+
+                            while (tokenActual().type != TokenType::CORCHETE_CIERRA) {
+                                if (tokenActual().type == TokenType::IDENTIFICADOR && tokenActual().lexema == "fecha") {  //cambio
+                                    siguienteToken();
+
+                                    if (coincidir(TokenType::DOS_PUNTOS)) {
+                                        if (tokenActual().type == TokenType::FECHA) {
+                                            fecha = tokenActual().lexema;
+                                            siguienteToken();
+                                        }
+                                        else {
+                                            reportarError("Se esperaba un valor de fecha", tokenActual());
+                                            siguienteToken();
+                                        }
+                                    }
+                                }
+
+                                else if (tokenActual().type == TokenType::IDENTIFICADOR && tokenActual().lexema == "hora") {  //cambio
+                                    siguienteToken();
+
+                                    if (coincidir(TokenType::DOS_PUNTOS)) {
+                                        if (tokenActual().type == TokenType::HORA) {
+                                            hora = tokenActual().lexema;
+                                            lineaHora = tokenActual().linea;
+                                            siguienteToken();
+
+                                        }
+                                        else {
+                                            reportarError("Se esperaba un valor de hora", tokenActual());
+                                            siguienteToken();
+                                        }
+                                    }
+                                }
+                                else {
+                                    siguienteToken();
+                                }
+                            }
+
+                            if (tokenActual().type == TokenType::CORCHETE_CIERRA) {
+                                siguienteToken();
+                            }
+
+                            if (fecha.empty()) {
+                                reportarError("La cita no tiene fecha especificada", Token(TokenType::ERROR, "", lineaPaciente, 0));
+                            }
+                            if (hora.empty()) {
+                                reportarError("La cita no tiene hora especificada", Token(TokenType::ERROR, "", lineaPaciente, 0));
+                            }
+                            if (!fecha.empty() && !hora.empty()) {
+                                Cita cita(nombrePaciente, nombreMedico, fecha, hora, lineaPaciente);
+                                citas.push_back(cita);
+
+                                cout << "  → Cita agregada: " << nombrePaciente << " con " << nombreMedico << " el " << fecha << " a las " << hora << endl;
+                            }
+                        }
+                    }
+                    else {
+                        reportarError("Se esperaba el nombre del médio entre comillas", tokenActual());
+                        siguienteToken();
+                    }
+                }
+                else {
+                    reportarError("Se esperaba 'con' entre el aciente y el médico", tokenActual());
+                    siguienteToken();
+                }
+            }
+            else {
+                reportarError("Se esperaba el nombre del paciente entre comillas", tokenActual());
+                siguienteToken();
+            }
+
+            if (tokenActual().type == TokenType::COMA) {
+                siguienteToken();
+            }
+        }
+        else {
+            reportarError("Se esperaba 'cita'", tokenActual());
+            siguienteToken();
+        }
+    }
+    if (tokenActual().type == TokenType::LLAVE_CIERRA) {
+        siguienteToken();
+    }
+    cout << "  Total citas encontradas: " << citas.size() << endl;
+}
+
+ 
+
 //parseo Diagnostico
+void Parser::parsearDiagnosticos() {
+    cout << "\n--- Parseando DIAGNOSTICOS ---" << endl;
+
+    if (!coincidir(TokenType::LLAVE_ABRE)) {
+        reportarError("Se esperaba '{' después de DIAGNOSTICOS", tokenActual());
+        return;
+    }
+
+    while (tokenActual().type != TokenType::LLAVE_CIERRA &&
+        tokenActual().type != TokenType::END_OF_FILE) {
+
+        if (tokenActual().type == TokenType::DIAGNOSTICO) {
+            siguienteToken();
+
+            if (!coincidir(TokenType::DOS_PUNTOS)) {
+                reportarError("Se esperaba ':' después de 'diagnostico'", tokenActual());
+                continue;
+            }
+
+            if (tokenActual().type == TokenType::CADENA) {
+                string nombrePaciente = tokenActual().lexema;
+                int lineaDiagnostico = tokenActual().linea;
+                siguienteToken();
+
+                if (coincidir(TokenType::CORCHETE_ABRE)) {
+                    string condicion = "";
+                    string medicamento = "";
+                    string dosis = "";
+                    bool encontreCondicion = false;
+                    bool encontreMedicamento = false;
+                    bool encontreDosis = false;
+
+                    while (tokenActual().type != TokenType::CORCHETE_CIERRA) {
+
+                        if (tokenActual().type == TokenType::IDENTIFICADOR && tokenActual().lexema == "condicion") {
+                            siguienteToken();
+
+                            if (coincidir(TokenType::DOS_PUNTOS)) {
+                                if (tokenActual().type == TokenType::CADENA) {
+                                    condicion = tokenActual().lexema;
+                                    encontreCondicion = true;
+                                    siguienteToken();
+                                }
+                                else {
+                                    reportarError("Se esperaba una cadena para la condición", tokenActual());
+                                }
+                            }
+                        }
+
+                        else if (tokenActual().type == TokenType::IDENTIFICADOR && tokenActual().lexema == "medicamento") {
+                            siguienteToken();
+
+                            if (coincidir(TokenType::DOS_PUNTOS)) {
+                                if (tokenActual().type == TokenType::CADENA) {
+                                    medicamento = tokenActual().lexema;
+                                    encontreMedicamento = true;
+                                    siguienteToken();
+                                }
+                                else {
+                                    reportarError("Se esperaba una cadena para el medicamento", tokenActual());
+                                }
+                            }
+                        }
+
+                        else if (tokenActual().type == TokenType::IDENTIFICADOR && tokenActual().lexema == "dosis") {
+                            siguienteToken();
+
+                            if (coincidir(TokenType::DOS_PUNTOS)) {
+                                if (tokenActual().type == TokenType::DIARIA || tokenActual().type == TokenType::CADA_8_HORAS || tokenActual().type == TokenType::CADA_12_HORAS || tokenActual().type == TokenType::SEMANAL) {
+
+                                    dosis = tokenActual().lexema;
+                                    encontreDosis = true;
+                                    siguienteToken();
+                                }
+                                else {
+                                    reportarError("Dosis no válida. Use: DIRIA, CADA_8_HORAS, CADA_12_HORAS, SEMANAL",
+                                        tokenActual());
+                                }
+                            }
+                        }
+                        else {
+                            siguienteToken();
+                        }
+
+                        if (tokenActual().type == TokenType::COMA) {
+                            siguienteToken();
+                        }
+                    }
+
+                    if (!encontreCondicion) {
+                        reportarError("Diagnóstico sin condición especificada", Token(TokenType::ERROR, "", lineaDiagnostico, 0));
+                    }
+                    if (!encontreMedicamento) {
+                        reportarError("Diagnóstico sin medicamento especificado", Token(TokenType::ERROR, "", lineaDiagnostico, 0));
+                    }
+                    if (!encontreDosis) {
+                        reportarError("Diagnóstico sin dosis especificada", Token(TokenType::ERROR, "", lineaDiagnostico, 0));
+                    }
+
+                    if (tokenActual().type == TokenType::CORCHETE_CIERRA) {
+                        siguienteToken();
+                    }
+
+                    Diagnostico diagnostico(nombrePaciente, condicion, medicamento, dosis, lineaDiagnostico);
+                    diagnosticos.push_back(diagnostico);
+                    cout << "  → Diagnóstico agregado: " << nombrePaciente << " - " << condicion << endl;
+                }
+            }
+            else {
+                reportarError("Se esperaba el nombre del paciente entre comillas", tokenActual());
+            }
+
+            if (tokenActual().type == TokenType::COMA) {
+                siguienteToken();
+            }
+        }
+        else {
+            reportarError("Se esperaba 'diagnostico'", tokenActual());
+            siguienteToken();
+        }
+    }
+
+    if (tokenActual().type == TokenType::LLAVE_CIERRA) {
+        siguienteToken();
+    }
+
+    cout << "  Total diagnósticos encontrados: " << diagnosticos.size() << endl;
+}
 
 
 
