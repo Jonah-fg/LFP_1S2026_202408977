@@ -20,7 +20,8 @@ enum class TokenType {
     NUMERO,         
     FECHA,          
     HORA,           
-    CODIGO_ID,      
+    CODIGO_ID, 
+    IDENTIFICADOR,
 
     // --- Enumeraciones (Especialidades) ---
     CARDIOLOGIA,

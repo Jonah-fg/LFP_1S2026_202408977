@@ -2,12 +2,13 @@
 #define ANALIZADORLEXICO_H
 #include <string>
 #include <vector>
+#include <map> 
 #include "Token.h"
 #include "ErrorLexico.h"
 
 enum class Estado {
     INICIO,
-    LEYENDO_PALABRA,
+    LEYENDO_ID,
     LEYENDO_NUMERO,
     LEYENDO_CODIGO_ID,
     LEYENDO_FECHA,
@@ -27,6 +28,7 @@ private:
     int columna;
 	int inicioLexema;
 
+    static const std::map<std::string, TokenType> palabrasReservadas;
     char siguienteCaracter();
     void retroceder();
     Token crearToken(TokenType tipo);

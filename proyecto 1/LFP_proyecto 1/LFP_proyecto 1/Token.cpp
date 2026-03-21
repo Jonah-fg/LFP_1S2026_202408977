@@ -11,7 +11,6 @@ Token::Token(TokenType type, std::string lexema, int linea, int columna) {
 string tokenTypeToString(TokenType type) {
 
     static map<TokenType, string> nombres={
-
         {TokenType::HOSPITAL, "HOSPITAL"},
         {TokenType::PACIENTES, "PACIENTES"},
         {TokenType::MEDICOS, "MEDICOS"},

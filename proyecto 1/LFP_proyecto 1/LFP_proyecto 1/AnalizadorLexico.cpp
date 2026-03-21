@@ -1,9 +1,47 @@
 #include "AnalizadorLexico.h"
 #include <cctype>
+#include <map> 
 #include <string>
 using namespace std;
 
-AnalizadorLexico::AnalizadorLexico(std::string input) {
+const map<string, TokenType> AnalizadorLexico::palabrasReservadas= {
+
+    {"HOSPITAL", TokenType::HOSPITAL},
+    {"PACIENTES", TokenType::PACIENTES},
+    {"MEDICOS", TokenType::MEDICOS},
+    {"CITAS", TokenType::CITAS},
+    {"DIAGNOSTICOS", TokenType::DIAGNOSTICOS},
+
+    {"paciente", TokenType::PACIENTE},
+    {"medico", TokenType::MEDICO},
+    {"cita", TokenType::CITA},
+    {"diagnostico", TokenType::DIAGNOSTICO},
+
+    {"edad", TokenType::IDENTIFICADOR},
+    {"tipo_sangre", TokenType::IDENTIFICADOR},
+    {"especialidad", TokenType::IDENTIFICADOR},
+    {"codigo", TokenType::IDENTIFICADOR},
+    {"condicion", TokenType::IDENTIFICADOR},
+    {"medicamento", TokenType::IDENTIFICADOR},
+    {"dosis", TokenType::IDENTIFICADOR},
+    {"fecha", TokenType::IDENTIFICADOR},
+    {"hora", TokenType::IDENTIFICADOR},
+     {"con", TokenType::IDENTIFICADOR},
+
+    {"CARDIOLOGIA", TokenType::CARDIOLOGIA},
+    {"NEUROLOGIA", TokenType::NEUROLOGIA},
+    {"PEDIATRIA", TokenType::PEDIATRIA},
+    {"CIRUGIA", TokenType::CIRUGIA},
+    {"MEDICINA_GENERAL", TokenType::MEDICINA_GENERAL},
+    {"ONCOLOGIA", TokenType::ONCOLOGIA},
+
+    {"DIARIA", TokenType::DIARIA},
+    {"CADA_8_HORAS", TokenType::CADA_8_HORAS},
+    {"CADA_12_HORAS", TokenType::CADA_12_HORAS},
+    {"SEMANAL", TokenType::SEMANAL}
+};
+
+AnalizadorLexico::AnalizadorLexico(string input) {
 
     this->input=input;
     this->posicion=0;
@@ -77,7 +115,7 @@ Token AnalizadorLexico::nextToken() {
                 tipoToken=TokenType::END_OF_FILE;
             }
             else if (isalpha(c)) {
-                estadoActual=Estado::LEYENDO_PALABRA;
+                estadoActual=Estado::LEYENDO_ID;
                 siguienteCaracter();
             }
             else if (isdigit(c)) {
@@ -86,7 +124,7 @@ Token AnalizadorLexico::nextToken() {
             }
             else if (c =='"') {
                 estadoActual=Estado::LEYENDO_CADENA;
-                siguienteCaracter();  // consume comilla iniciall
+                siguienteCaracter();  
             }
             else if (c == '{') {
                 siguienteCaracter();
@@ -125,74 +163,23 @@ Token AnalizadorLexico::nextToken() {
             break;
         }
 
-        case Estado::LEYENDO_PALABRA: {
-            if (isalnum(c)) {  
+        case Estado::LEYENDO_ID: {
+            if (isalnum(c) || c =='_') {
                 siguienteCaracter();
             }
-            else if (c == '-'){
-                estadoActual = Estado::LEYENDO_CODIGO_ID;
+
+            else if (c =='-'){
+                estadoActual=Estado::LEYENDO_CODIGO_ID;
                 siguienteCaracter();
             }
             else {
                 aceptado=true;
                 string palabra=input.substr(inicioLexema, posicion - inicioLexema);
 
-                if (palabra=="HOSPITAL")
-                    tipoToken = TokenType::HOSPITAL;
-
-                else if (palabra=="PACIENTES")
-                    tipoToken=TokenType::PACIENTES;
-
-                else if (palabra=="MEDICOS") 
-                    tipoToken=TokenType::MEDICOS;
-
-                else if (palabra== "CITAS") 
-                    tipoToken=TokenType::CITAS;
-
-                else if (palabra== "DIAGNOSTICOS")
-                    tipoToken= TokenType::DIAGNOSTICOS;
-
-                else if (palabra== "paciente")
-                    tipoToken=TokenType::PACIENTE;
-
-                else if (palabra == "medico")
-                    tipoToken = TokenType::MEDICO;
-
-                else if (palabra == "cita")
-                    tipoToken = TokenType::CITA;
-
-                else if (palabra=="diagnostico")
-                    tipoToken =TokenType::DIAGNOSTICO;
-
-                else if (palabra =="CARDIOLOGIA") 
-                    tipoToken=TokenType::CARDIOLOGIA;
-
-                else if (palabra== "NEUROLOGIA") 
-                    tipoToken= TokenType::NEUROLOGIA;
-
-                else if (palabra== "PEDIATRIA")
-                    tipoToken= TokenType::PEDIATRIA;
-
-                else if (palabra== "CIRUGIA")
-                    tipoToken= TokenType::CIRUGIA;
-
-                else if (palabra== "MEDICINA_GENERAL") 
-                    tipoToken=TokenType::MEDICINA_GENERAL;
-
-                else if (palabra=="ONCOLOGIA") 
-                    tipoToken=TokenType::ONCOLOGIA;
-
-                else if (palabra == "DIARIA")
-                    tipoToken = TokenType::DIARIA;
-
-                else if (palabra == "CADA_8_HORAS") 
-                    tipoToken = TokenType::CADA_8_HORAS;
-
-                else if (palabra == "CADA_12_HORAS")
-                    tipoToken = TokenType::CADA_12_HORAS;
-
-                else if (palabra == "SEMANAL")
-                    tipoToken = TokenType::SEMANAL;
+                auto buscador= palabrasReservadas.find(palabra);
+                if (buscador != palabrasReservadas.end()) {
+                    tipoToken =buscador->second;
+                }
                 else {
                     reportarError(palabra, "Palabra no reconocida", lineaInicio, columnaInicio);
                     tipoToken=TokenType::ERROR;
@@ -209,17 +196,31 @@ Token AnalizadorLexico::nextToken() {
                 aceptado=true;
                 string codigo=input.substr(inicioLexema, posicion - inicioLexema);
 
-                if (codigo.length() >= 5 && isalpha(codigo[0]) && isalpha(codigo[1]) && isalpha(codigo[2]) && codigo[3] == '-' && isdigit(codigo[4])) {
-                    tipoToken=TokenType::CODIGO_ID;
+                if (codigo.length() >= 5 && isalpha(codigo[0]) && isalpha(codigo[1]) && isalpha(codigo[2]) && codigo[3] == '-') {
+                    bool digitosValidos =true;
+                    for (size_t i=4; i < codigo.length(); i++) {
+                        if (!isdigit(codigo[i])) {
+                            digitosValidos = false;
+                            break;
+                        }
+                    }
+                    if (digitosValidos){
+                        tipoToken=TokenType::CODIGO_ID;
+                    }
+                    else{
+                        reportarError(codigo, "Código inválido. Debe tener dígitos después del guión",lineaInicio, columnaInicio);
+                        tipoToken =TokenType::ERROR;
+                    }
                 }
-                else {
-                    reportarError(codigo, "Formato de código inválido. Debe ser: LETRAS-DIGITOS (ej: MED-001)", lineaInicio, columnaInicio);
+                else{
+                    reportarError(codigo, "Formato de código inválido. Debe ser: LETRAS-DÍGITOS (ej: MED-001)",lineaInicio, columnaInicio);
                     tipoToken=TokenType::ERROR;
                 }
             }
             break;
         }
 
+               
         case Estado::LEYENDO_NUMERO: {
             if (isdigit(c)) {
                 siguienteCaracter();
@@ -253,7 +254,7 @@ Token AnalizadorLexico::nextToken() {
             break;
         }
 
-        case Estado::LEYENDO_FECHA: {
+        case Estado::LEYENDO_FECHA:{
             if (isdigit(c)) {
                 siguienteCaracter();
             }
@@ -279,7 +280,7 @@ Token AnalizadorLexico::nextToken() {
                     }
                 }
                 else{
-                    reportarError(fecha, "Formato de fecha inválido. Use AAAA-MM-DD", lineaInicio, columnaInicio);
+                    reportarError(fecha, "Formato de fecha inv{{lido. Use AAAA-MM-DD", lineaInicio, columnaInicio);
                     tipoToken = TokenType::ERROR;
                 }
             }
@@ -308,7 +309,7 @@ Token AnalizadorLexico::nextToken() {
                 aceptado=true;
                 string hora=input.substr(inicioLexema, posicion - inicioLexema);
 
-                if (hora.length() == 5 &&(hora[0]) && isdigit(hora[1]) &&hora[2] == ':' &&isdigit(hora[3]) && isdigit(hora[4])) {
+                if (hora.length() == 5 &&(hora[0]) && isdigit(hora[1]) && hora[2] == ':' &&isdigit(hora[3]) && isdigit(hora[4])) {
                     // hora (00-23) y minutos (00-59)
                     int horas = stoi(hora.substr(0, 2));
                     int minutos = stoi(hora.substr(3, 2));
@@ -335,15 +336,15 @@ Token AnalizadorLexico::nextToken() {
                 aceptado=true;
                 tipoToken=TokenType::CADENA;
             }
-            else if (c=='\n'|| c=='\0') {
-                // Cadena sin cerrar
+            else if (c=='\n'|| c=='\0'){
+
                 aceptado=true;
                 string cadena=input.substr(inicioLexema, posicion - inicioLexema);
                 reportarError(cadena, "Cadena sin cerrar", lineaInicio, columnaInicio);
                 tipoToken=TokenType::ERROR;
                 if (c =='\n') {
                     linea++;
-                    columna = 1;
+                    columna= 1;
                 }
             }
             else {
