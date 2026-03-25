@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClCompile Include="AnalizadorLexico.cpp" />
     <ClCompile Include="ErrorLexico.cpp" />
+    <ClCompile Include="GeneradorReporte.cpp" />
     <ClCompile Include="LFP_proyecto 1.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Token.cpp" />
@@ -138,6 +139,7 @@
     <ClInclude Include="Cita.h" />
     <ClInclude Include="Diagnostico.h" />
     <ClInclude Include="ErrorLexico.h" />
+    <ClInclude Include="GeneradorReporte.h" />
     <ClInclude Include="Medico.h" />
     <ClInclude Include="paciente.h" />
     <ClInclude Include="parser.h" />

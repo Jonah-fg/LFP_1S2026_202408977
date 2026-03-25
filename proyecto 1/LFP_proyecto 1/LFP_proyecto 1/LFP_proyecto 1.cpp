@@ -5,6 +5,7 @@
 #include "AnalizadorLexico.h"
 #include "Parser.h"
 #include "Token.h"
+#include "GeneradorReporte.h"
 
 using namespace std;
 
@@ -29,7 +30,7 @@ void mostrarTokens(const vector<Token>& tokens) {
         cout << i + 1 << "\t";
         cout << tokenTypeToString(tokens[i].type) << "\t\t";
         cout << tokens[i].lexema << "\t\t";
-        cout << tokens[i].linea << "\t";
+        cout << tokens[i].linea<< "\t";
         cout << tokens[i].columna << "\n";
     }
 }
@@ -128,7 +129,7 @@ int main() {
             cout << "Promedio de edad: " << promedio << " años\n";
         }
 
-        cout << "\n CITAS POR MEDICO:\n";
+        cout << "\n CITAS POR MEDICO:";
         for (size_t i=0; i<parser.medicos.size(); i++) {
             Medico med =parser.medicos[i];
             int contador =0;
@@ -138,7 +139,7 @@ int main() {
                     contador++;
                 }
             }
-            cout << "   • " << med.nombre << ": " << contador << " cita(s)\n";
+            cout << "    " << med.nombre << ": " << contador << " cita(s)\n";
         }
 
     }
@@ -153,6 +154,10 @@ int main() {
             cout << "   "<< parser.erroresSintacticos[i] << "\n";
         }
     }
+
+    cout << "\n GENERANDO REPORTES HTML \n";
+    GeneradorReporte generadorReporte(parser.pacientes, parser.medicos, parser.citas, parser.diagnosticos, "Hospital General");
+    generadorReporte.generarTodosReportes();
 
     cout << "\n==========================================\n";
     cout << "           FIN DEL ANÁLISIS\n";

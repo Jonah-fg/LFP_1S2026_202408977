@@ -1,29 +1,29 @@
 HOSPITAL {
     PACIENTES {
-        paciente: "Ana López" [edad: 34, tipo_sangre: "O+"],
+        paciente: "Ana Lopez" [edad: 34, tipo_sangre: "O+"],
         paciente: "Carlos Mendoza" [edad: 62, tipo_sangre: "O-"],
-        paciente: "María García" [edad: 45, tipo_sangre: "A+"],
-        paciente: "Sofía Ramírez" [edad: 29, tipo_sangre: "B+"]
+        paciente: "Maria Garcia" [edad: 45, tipo_sangre: "A+"],
+        paciente: "Sofia Ramirez" [edad: 29, tipo_sangre: "B+"]
     },
     
     MEDICOS {
-        medico: "Dr. Roberto Juárez" [especialidad: CARDIOLOGIA, codigo: "MED-001"],
-        medico: "Dra. Ana Solís" [especialidad: NEUROLOGIA, codigo: "MED-002"],
+        medico: "Dr. Roberto Juarez" [especialidad: CARDIOLOGIA, codigo: "MED-001"],
+        medico: "Dra. Ana Solis" [especialidad: NEUROLOGIA, codigo: "MED-002"],
         medico: "Dr. Luis Herrera" [especialidad: PEDIATRIA, codigo: "MED-003"],
         medico: "Dra. Carmen Vega" [especialidad: CIRUGIA, codigo: "MED-004"]
     },
     
     CITAS {
-        cita: "Ana López" con "Dr. Roberto Juárez" [fecha: 2025-04-10, hora: 09:00],
-        cita: "Carlos Mendoza" con "Dra. Ana Solís" [fecha: 2025-04-10, hora: 11:30],
-        cita: "María García" con "Dr. Roberto Juárez" [fecha: 2025-04-10, hora: 09:00],
-        cita: "Sofía Ramírez" con "Dr. Luis Herrera" [fecha: 2025-04-11, hora: 08:00],
-        cita: "Ana López" con "Dra. Carmen Vega" [fecha: 2025-04-12, hora: 14:00]
+        cita: "Ana Lopez" con "Dr. Roberto Juarez" [fecha: 2025-04-10, hora: 09:00],
+        cita: "Carlos Mendoza" con "Dra. Ana Solis" [fecha: 2025-04-10, hora: 11:30],
+        cita: "Maria Garcia" con "Dr. Roberto Juarez" [fecha: 2025-04-10, hora: 09:00],
+        cita: "Sofia Ramirez" con "Dr. Luis Herrera" [fecha: 2025-04-11, hora: 08:00],
+        cita: "Ana Lopez" con "Dra. Carmen Vega" [fecha: 2025-04-12, hora: 14:00]
     },
     
     DIAGNOSTICOS {
-        diagnostico: "Ana López" [condicion: "Hipertensión Arterial", medicamento: "Losartán 50mg", dosis: DIARIA],
+        diagnostico: "Ana Lopez" [condicion: "Hipertension Arterial", medicamento: "Losartan 50mg", dosis: DIARIA],
         diagnostico: "Carlos Mendoza" [condicion: "Diabetes Tipo 2", medicamento: "Metformina 850mg", dosis: CADA_12_HORAS],
-        diagnostico: "María García" [condicion: "Insuficiencia Cardíaca", medicamento: "Furosemida 40mg", dosis: DIARIA]
+        diagnostico: "Maria Garcia" [condicion: "Insuficiencia Cardiaca", medicamento: "Furosemida 40mg", dosis: DIARIA]
     }
 }

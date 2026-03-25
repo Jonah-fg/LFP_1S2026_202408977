@@ -5,7 +5,6 @@
 using namespace std;
 
 const map<string, TokenType> AnalizadorLexico::palabrasReservadas= {
-
     {"HOSPITAL", TokenType::HOSPITAL},
     {"PACIENTES", TokenType::PACIENTES},
     {"MEDICOS", TokenType::MEDICOS},
