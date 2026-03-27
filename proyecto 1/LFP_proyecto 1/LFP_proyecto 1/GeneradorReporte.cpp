@@ -32,6 +32,147 @@ string GeneradorReporte::escaparParaGraphviz(string texto) {
     return resultado;
 }
 
+int GeneradorReporte::contarCitasConConflicto() {
+    int conflictos=0;
+    for (int i =0; i<citas.size(); i++) {
+        for (int j=i + 1; j<citas.size(); j++) {
+            if (citas[i].nombreMedico== citas[j].nombreMedico && citas[i].fecha== citas[j].fecha && citas[i].hora == citas[j].hora) {
+                conflictos++;
+                break; 
+            }
+        }
+    }
+    return conflictos;
+}
+
+
+int GeneradorReporte::contarPacientesConDiagnostico() {
+    int contador=0;
+    for (int i=0; i<pacientes.size(); i++) {
+        for (int j= 0; j <diagnosticos.size(); j++) {
+            if (diagnosticos[j].nombrePaciente== pacientes[i].nombre) {
+                contador++;
+                break;
+            }
+        }
+    } 
+    return contador;
+}
+
+string GeneradorReporte::obtenerMedicamentoMasFrecuente() {
+    if (diagnosticos.empty()) {
+        return "Ninguno";
+    }
+    map<string, int> frecuenciaMedicamentos;
+
+    for (int i=0; i<diagnosticos.size(); i++) {
+        frecuenciaMedicamentos[diagnosticos[i].medicamento]++;
+    }
+    string medicamentoMasFrecuente;
+    int maxFrecuencia= 0;
+
+    for (map<string, int>::iterator i =frecuenciaMedicamentos.begin(); i != frecuenciaMedicamentos.end(); ++i) {
+        if (i->second> maxFrecuencia) {
+            maxFrecuencia =i->second;
+            medicamentoMasFrecuente=i->first;
+        }
+    }
+    return medicamentoMasFrecuente +"(" + to_string(maxFrecuencia) + "pacientes)";
+}
+
+
+string GeneradorReporte::obtenerEspecialidadMayorCarga(int& maxCitas, string& medicoNombre) {
+    map<string, int> citasPorEspecialidad;
+
+    for (int i = 0; i<medicos.size(); i++) {
+        citasPorEspecialidad[medicos[i].especialidad]= 0;
+    }
+
+    for (int i=0; i <citas.size(); i++) {
+        string especialidad= obtenerEspecialidadMedico(citas[i].nombreMedico);
+        citasPorEspecialidad[especialidad]++;
+    }
+    string especialidadMax;
+    maxCitas=0;
+    for (map<string, int>::iterator i=citasPorEspecialidad.begin(); i != citasPorEspecialidad.end(); ++i) {
+        if (i->second> maxCitas) {
+            maxCitas =i->second;
+            especialidadMax= i->first;
+        }
+    }
+    for (int i =0; i<medicos.size(); i++) {
+        if (medicos[i].especialidad==especialidadMax) {
+            medicoNombre= medicos[i].nombre;
+            break;
+        }
+    }
+    return especialidadMax;
+}
+
+float GeneradorReporte::calcularPromedioEdad() {
+    if (pacientes.empty()){
+        return 0.0;
+    }
+
+    int sumaEdades= 0;
+    for (int i=0; i <pacientes.size(); i++) {
+        sumaEdades+= pacientes[i].edad;
+    }
+    return (float)sumaEdades/ pacientes.size();
+}
+
+vector<GeneradorReporte::EstadisticaEspecialidad>
+GeneradorReporte::obtenerEstadisticasPorEspecialidad() {
+    vector<EstadisticaEspecialidad> estadisticas;
+
+    map<string, vector<Medico>> medicosPorEspecialidad;
+    for (int i =0; i<medicos.size(); i++) {
+        medicosPorEspecialidad[medicos[i].especialidad].push_back(medicos[i]);
+    }
+
+    for (map<string, vector<Medico>>::iterator i =medicosPorEspecialidad.begin(); i !=medicosPorEspecialidad.end(); ++i) {
+        EstadisticaEspecialidad est;
+        est.nombre = i->first;
+        est.numMedicos = i->second.size();
+
+        est.numCitas =0;
+        for (int i =0; i< citas.size(); i++) {
+            string especialidadMedico=obtenerEspecialidadMedico(citas[i].nombreMedico);
+            if (especialidadMedico == est.nombre){
+                est.numCitas++;
+            }
+        }
+
+ //pacientes distintos atendidos por médicos de esta especialidad
+        vector<string> pacientesAtendidos;
+        for (int i = 0; i <citas.size(); i++) {
+            string especialidadMedico = obtenerEspecialidadMedico(citas[i].nombreMedico);
+            if (especialidadMedico == est.nombre) {
+                bool yaExiste = false;
+                for (int j =0; j<pacientesAtendidos.size(); j++) {
+                    if (pacientesAtendidos[j]== citas[i].nombrePaciente) {
+                        yaExiste =true;
+                        break;
+                    }
+                }
+                if (!yaExiste) {
+                    pacientesAtendidos.push_back(citas[i].nombrePaciente);
+                }
+            }
+        }
+        est.numPacientes =pacientesAtendidos.size();
+
+        if (citas.size()>0) {
+            est.porcentaje =(est.numCitas * 100.0) / citas.size();
+        }
+        else {
+            est.porcentaje = 0;
+        }
+        estadisticas.push_back(est);
+    }
+    return estadisticas;
+}
+
 
 string GeneradorReporte::obtenerDiagnosticoPaciente(string nombrePaciente, string& medicamento, string& dosis) {
     for (size_t i = 0; i<diagnosticos.size(); i++) {
@@ -78,13 +219,13 @@ int GeneradorReporte::contarPacientesDistintosPorMedico(string nombreMedico) {
 }
 
 bool GeneradorReporte::ConflictoCita(Cita cita) {
-    for (size_t i=0; i<citas.size(); i++) {
-        if (cita.linea ==citas[i].linea &&
-            cita.nombrePaciente == citas[i].nombrePaciente) {
+    for (size_t i=0; i<citas.size(); i++){
+        if (cita.linea==citas[i].linea &&
+            cita.nombrePaciente==citas[i].nombrePaciente) {
             continue;
         }
         // Verificar conflicto
-        if (cita.nombreMedico == citas[i].nombreMedico && cita.fecha == citas[i].fecha && cita.hora == citas[i].hora) {
+        if (cita.nombreMedico ==citas[i].nombreMedico && cita.fecha== citas[i].fecha && cita.hora==citas[i].hora) {
             return true;
         }
     }
@@ -106,8 +247,6 @@ string GeneradorReporte::obtenerNivelCarga(int numCitas) {
     }
     return "SIN CITAS";
 }
-
-
 
 string GeneradorReporte::obtenerEspecialidadMedico(string nombreMedico) {
     for (int i=0; i <medicos.size(); i++){
@@ -160,7 +299,7 @@ void GeneradorReporte::generarHTMLReporte1() {
         Paciente pac =pacientes[i];
         string medicamento;
         string dosis;
-        string diagnostico =obtenerDiagnosticoPaciente(pac.nombre, medicamento, dosis);
+        string diagnostico=obtenerDiagnosticoPaciente(pac.nombre, medicamento, dosis);
 
         string estado;
         string clase;
@@ -189,8 +328,9 @@ void GeneradorReporte::generarHTMLReporte1() {
     archivo << "</body>\n";
     archivo << "</html>\n";
     archivo.close();
-    cout << " Reporte 1: reporte1_pacientes.html"<< endl;
+    cout << " Reporte 1: reporte1_pacients.html"<< endl;
 }
+
 
 //-----------------------
 void GeneradorReporte::generarHTMLReporte2() {
@@ -263,6 +403,7 @@ void GeneradorReporte::generarHTMLReporte2() {
     cout << " Reporte 2: reporte2_medicos.html" << endl;
 } 
 
+
 //-------------
 void GeneradorReporte::generarHTMLReporte3() {
     ofstream archivo("reporte3_citas.html");
@@ -305,7 +446,7 @@ void GeneradorReporte::generarHTMLReporte3() {
         archivo << "             <td>" << c.fecha << "</td>\n";
         archivo << "             <td>" << c.hora << "</td>\n";
         archivo << "             <td>" << c.nombrePaciente << "</td>\n";
-        archivo << "             <td>" << c.nombreMedico << "</td>\n";
+        archivo << "             <td>"<< c.nombreMedico << "</td>\n";
         archivo << "             <td>" << especialidad << "</td>\n";
         archivo << "             <td>" << estado << "</td>\n";
         archivo << "         </tr>\n";
@@ -317,6 +458,155 @@ void GeneradorReporte::generarHTMLReporte3() {
     archivo.close();
     cout << " Reporte 3: reporte3_citas.html" << endl;
 }
+
+
+//---------------------
+void GeneradorReporte::generarHTMLReporte4() {
+
+    ofstream archivo("reporte4_estadistico.html");
+    if (!archivo.is_open()) {
+        cout << "Error: No se pudo crear reporte4_estadistico.html" << endl;
+        return;
+    }
+
+// seccion KPIs
+    int totalPacientes= pacientes.size();
+    int totalMedicos=medicos.size();
+    int totalCitas =citas.size();
+    int citasConflicto =contarCitasConConflicto();
+    int pacientesConDiagnostico=contarPacientesConDiagnostico();
+    float porcentajeDiagnostico =(totalPacientes > 0) ? 
+        (pacientesConDiagnostico * 100.0) / totalPacientes : 0;
+    string medicamentoFrecuente=obtenerMedicamentoMasFrecuente();
+    
+    int maxCitasEspecialidad;
+    string medicoEjemplo;
+    string especialidadMayorCarga =obtenerEspecialidadMayorCarga(maxCitasEspecialidad, medicoEjemplo);
+    
+    float promedioEdad = calcularPromedioEdad();
+    vector<EstadisticaEspecialidad> estadisticas=obtenerEstadisticasPorEspecialidad();
+    
+    archivo << "<!DOCTYPE html>\n";
+    archivo << "<html>\n";
+    archivo << "<head>\n";
+    archivo << "    <meta charset=\"UTF-8\">\n";
+    archivo << "    <title>Reporte 4 - Estadístico General del Hospital</title>\n";
+    archivo << "    <style>\n";
+    archivo << "        body { font-family: Arial, sans-serif; margin: 20px; }\n";
+    archivo << "        h1 { color: #2c3e50; text-align: center; }\n";
+    archivo << "        h2 { color: #34495e; margin-top: 30px; }\n";
+    archivo << "        table { border-collapse: collapse; width: 100%; margin-top: 20px; }\n";
+    archivo << "        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }\n";
+    archivo << "        th { background-color: #2c3e50; color: white; }\n";
+    archivo << "        .barra-progreso { background-color: #ecf0f1; height: 20px; width: 100%; }\n";
+    archivo << "        .barra { background-color: #27ae60; height: 20px; color: white; text-align: center; line-height: 20px; }\n";
+    archivo << "        .barra-saturada { background-color: #e74c3c; }\n";
+    archivo << "        tr.alerta { background-color: #f8d7da; }\n";
+    archivo << "    </style>\n";
+    archivo << "</head>\n";
+    archivo << "<body>\n";
+
+    archivo << "    <h1>Estadístico General del Hospital</h1>\n";
+
+    archivo << "    <h2>Sección A — Indicadores clave del hospital</h2>\n";
+    archivo << "     <table border=\"1\">\n";
+    archivo << "         <thead>\n";
+    archivo << "             <tr>\n";
+    archivo << "                 <th>Indicador</th>\n";
+    archivo << "                 <th>Valor</th>\n";
+    archivo << "             </tr>\n";
+    archivo << "         </thead>\n";
+    archivo << "         <tbody>\n";
+
+    archivo << "             <tr>\n";
+    archivo << "                 <td>Nombre del hospital</td>\n";
+    archivo << "                 <td>" << nombreHospital << "</td>\n";
+    archivo << "             </tr>\n";
+
+    archivo << "             <tr>\n";
+    archivo << "                 <td>Total de pacientes registrados</td>\n";
+    archivo << "                 <td>" << totalPacientes << "</td>\n";
+    archivo << "             </tr>\n";
+
+    archivo << "             <tr>\n";
+    archivo << "                 <td>Total de médicos activos</td>\n";
+    archivo << "                 <td>" << totalMedicos << "</td>\n";
+    archivo << "             </tr>\n";
+
+    archivo << "             <tr>\n";
+    archivo << "                 <td>Total de citas programadas</td>\n";
+    archivo << "                 <td>" << totalCitas << "</td>\n";
+    archivo << "             </tr>\n";
+
+    archivo << "             <tr>\n";
+    archivo << "                 <td>Citas con conflicto de horario</td>\n";
+    archivo << "                 <td>" << citasConflicto << "</td>\n";
+    archivo << "             </tr>\n";
+
+    archivo << "             <tr>\n";
+    archivo << "                 <td>Pacientes con diagnóstico activo</td>\n";
+    archivo << "                 <td>" << pacientesConDiagnostico << " de " << totalPacientes<< "("<< (totalPacientes > 0 ? (int)(pacientesConDiagnostico * 100.0 / totalPacientes) : 0) << "%)</td>\n";
+    archivo << "             </tr>\n";
+
+    archivo << "             <tr>\n";
+    archivo << "                 <td>Medicamento más prescrito</td>\n";
+    archivo << "                 <td>" << medicamentoFrecuente << "</td>\n";
+    archivo << "             </tr>\n";
+
+    archivo << "             <tr>\n";
+    archivo << "                 <td>Especialidad con mayor carga de citas</td>\n";
+    archivo << "                 <td>" << especialidadMayorCarga << " — " << medicoEjemplo<< " (" << maxCitasEspecialidad << " citas)</td>\n";
+    archivo << "             </tr>\n";
+
+    archivo << "             <tr>\n";
+    archivo << "                 <td>Promedio de edad de los pacientes</td>\n";
+    archivo << "                 <td>" << promedioEdad << " años</td>\n";
+    archivo << "             </tr>\n";
+
+    archivo << "         </tbody>\n";
+    archivo << "     </table>\n";
+    archivo << "    <h2>Sección B — Distribución de carga por especialidad</h2>\n";
+    archivo << "     <table border=\"1\">\n";
+    archivo << "         <thead>\n";
+    archivo << "             <tr>\n";
+    archivo << "                 <th>Especialidad</th>\n";
+    archivo << "                 <th>Médicos</th>\n";
+    archivo << "                 <th>Citas</th>\n";
+    archivo << "                 <th>Pacientes</th>\n";
+    archivo << "                 <th>Barra de ocupación</th>\n";
+    archivo << "             </tr>\n";
+    archivo << "         </thead>\n";
+    archivo << "         <tbody>\n";
+    
+    for (int i =0; i < estadisticas.size(); i++) {
+        EstadisticaEspecialidad estadisticaEspe = estadisticas[i]; 
+        bool saturada=(estadisticaEspe.porcentaje > 80);
+
+        string claseBarra ="barra";
+        if (saturada){
+            claseBarra ="barra barra-saturada";
+        }
+        archivo << "             <tr" << (saturada ? " class=\"alerta\"" : "") << ">\n";
+        archivo << "                 <td>" << estadisticaEspe.nombre << "</td>\n";
+        archivo << "                 <td>" << estadisticaEspe.numMedicos << "</td>\n";
+        archivo << "                 <td>" << estadisticaEspe.numCitas <<"</td>\n";
+        archivo << "                 <td>" << estadisticaEspe.numPacientes << "</td>\n";
+        archivo << "                 <td style=\"width: 200px;\">\n";
+        archivo << "                     <div class=\"barra-progreso\">\n";
+        archivo << "                         <div class=\"" << claseBarra<< "\" style=\"width: " << estadisticaEspe.porcentaje << "%;\">" << (int)estadisticaEspe.porcentaje << "%</div>\n";
+        archivo << "                     </div>\n";
+        archivo << "                 </td>\n";
+        archivo << "             </tr>\n";
+    }
+    archivo << "         </tbody>\n";
+    archivo << "     </table>\n";
+    archivo << "</body>\n";
+    archivo << "</html>\n";
+
+    archivo.close();
+    cout << " Reporte 4: reporte4_estadistico.html" << endl;
+}
+
 
 
 void GeneradorReporte::generarArchivoDot() {
@@ -381,13 +671,13 @@ void GeneradorReporte::generarArchivoDot() {
         archivo << "   D -> d" <<i<< ";\n";
 
         if (idxPacienteDiag !=-1) {
-            archivo << "    d" << i << " -> p" <<idxPacienteDiag << " [label=\"diagnostico activo\", color=\"#C0392B\"];\n";
+            archivo << "    d" <<i<< " -> p" <<idxPacienteDiag << " [label=\"diagnostico activo\", color=\"#C0392B\"];\n";
         }
     }
     archivo << "}\n";
     archivo.close();
     cout << "   Archivo Graphviz geneado: hospital.dot" << endl;
-    cout << "   Para viualizar: dot -Tpng hospital.dot -o hospital.png" << endl;
+    cout << "   Para viualzar: dot -Tpng hospital.dot -o hospital.png" << endl;
 }
 
 
@@ -397,6 +687,7 @@ void GeneradorReporte::generarTodosReportes() {
     generarHTMLReporte1();
     generarHTMLReporte2();
     generarHTMLReporte3();
+    generarHTMLReporte4();
     generarArchivoDot();
     cout << "Todos los reportes generados exitosamente" << endl;
 }

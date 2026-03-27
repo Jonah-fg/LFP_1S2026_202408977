@@ -86,7 +86,7 @@ Token AnalizadorLexico::nextToken() {
     TokenType tipoToken = TokenType::ERROR;
 
     while (posicion < input.length() && isspace(input[posicion])) {
-        if (input[posicion] == '\n') {
+        if (input[posicion] =='\n') {
             linea++;
             columna=1;
         }

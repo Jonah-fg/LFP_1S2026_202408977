@@ -18,12 +18,10 @@ private:
     string escaparParaGraphviz(string texto);
     string nombreHospital;
     
-
     void generarHTMLReporte1();
     void generarHTMLReporte2();
     void generarHTMLReporte3();
     void generarHTMLReporte4();
-    void generarArchivoDot();
 
     string obtenerDiagnosticoPaciente(string nombrePaciente, string& medicamento, string& dosis);
     int contarCitasPorMedico(string nombreMedico);
@@ -33,9 +31,25 @@ private:
     string obtenerEstadoCita(Cita cita);
     string obtenerEspecialidadMedico(string nombreMedico);
 
+    int contarCitasConConflicto();
+    int contarPacientesConDiagnostico();
+    string obtenerMedicamentoMasFrecuente();
+    string obtenerEspecialidadMayorCarga(int& maxCitas, string& medicoNombre);
+    float calcularPromedioEdad();
+
+    struct EstadisticaEspecialidad {
+        string nombre;
+        int numMedicos;
+        int numCitas;
+        int numPacientes;
+        float porcentaje;
+    };
+    vector<EstadisticaEspecialidad> obtenerEstadisticasPorEspecialidad();
+
 public:
     GeneradorReporte(vector<Paciente> pacientes, vector<Medico> medicos, vector<Cita> citas, vector<Diagnostico> diagnosticos, string nombreHospital);
     void generarTodosReportes();
+    void generarArchivoDot();
 };
 #endif
 
