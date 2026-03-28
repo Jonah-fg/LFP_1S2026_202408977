@@ -1,0 +1,3 @@
+C:\Qt\Tools\CMake_64\bin\cmake.exe -E rm -f CMakeFiles\GUI_proyecto1_LFP.dir/objects.a
+C:\Qt\Tools\mingw1310_64\bin\ar.exe qc CMakeFiles\GUI_proyecto1_LFP.dir/objects.a @CMakeFiles\GUI_proyecto1_LFP.dir\objects1.rsp
+C:\Qt\Tools\mingw1310_64\bin\g++.exe -g -mwindows -Wl,--whole-archive CMakeFiles\GUI_proyecto1_LFP.dir/objects.a -Wl,--no-whole-archive -o GUI_proyecto1_LFP.exe -Wl,--out-implib,libGUI_proyecto1_LFP.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\GUI_proyecto1_LFP.dir\linkLibs.rsp

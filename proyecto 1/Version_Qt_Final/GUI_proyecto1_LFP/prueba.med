@@ -1,0 +1,14 @@
+HOSPITAL {
+    PACIENTES {
+        paciente: "Ana Lopez" [edad: 34, tipo_sangre: "O++"],
+        paciente: "Carlos Mendoza" [edad: 45, tipo_sangre: "A-"]
+    },
+
+    MEDICOS {
+        medico: "Dr. Roberto Juarez" [especialidad: CARDIOLOGIA, codigo: "MED-001"]
+    },
+
+    CITAS {
+        cita: "Ana Lopez" con "Dr. Roberto Juarez" [fecha: 2025-13-45, hora: 25:00]
+    }
+}
