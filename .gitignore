@@ -416,3 +416,23 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Qt específico
+*.pro.user
+*.qmake.stash
+Makefile
+*.moc
+moc_*.cpp
+ui_*.h
+*.o
+*.exe
+
+# Carpeta de compilación
+build/
+build-*/
+*-build/
+
+# Archivos generados por el programa
+reporte*.html
+hospital.dot
+hospital.png

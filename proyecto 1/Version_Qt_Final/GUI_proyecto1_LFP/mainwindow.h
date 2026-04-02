@@ -26,6 +26,7 @@ public:
     ~MainWindow() override;
 
 private slots:
+    void mostrarErroresSintacticos(const std::vector<ErrorSintactico>& erroresSintacticos);
     void on_btnCargarArchivo_clicked();
 
     void on_btonAnalizar_clicked();

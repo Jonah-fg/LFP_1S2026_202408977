@@ -1,10 +1,13 @@
 #ifndef ANALIZADORLEXICO_H
 #define ANALIZADORLEXICO_H
+
 #include <string>
 #include <vector>
-#include <map> 
+#include <map>
 #include "Token.h"
 #include "ErrorLexico.h"
+
+using namespace std;
 
 enum class Estado {
     INICIO,
@@ -12,34 +15,44 @@ enum class Estado {
     LEYENDO_NUMERO,
     LEYENDO_CODIGO_ID,
     LEYENDO_FECHA,
+    LEYENDO_FECHA_ANIO,
+    LEYENDO_FECHA_MES,
+    LEYENDO_FECHA_DIA,
     LEYENDO_HORA,
+    LEYENDO_HORA_MINUTOS,
     LEYENDO_CADENA,
-    LEYENDO_HORA_SEGUNDA_PARTE,
-    LEYENDO_FECHA_DESPUES_GUION,
     EN_ERROR
 };
 
-class AnalizadorLexico{
-
+class AnalizadorLexico {
 private:
-    std::string input;
+    string input;
     int posicion;
     int linea;
     int columna;
-	int inicioLexema;
+    int inicioLexema;
+    int lineaInicioLexema;
+    int columnaInicioLexema;
 
-    static const std::map<std::string, TokenType> palabrasReservadas;
+    static const map<string, TokenType> palabrasReservadas;
+    static const map<string, TokenType> especialidadesValidas;
+    static const map<string, TokenType> dosisValidas;
+
     char siguienteCaracter();
     void retroceder();
-    Token crearToken(TokenType tipo);
-    void reportarError(std::string lexema, std::string descripcion, int lineaError, int columnaError);
+    void reiniciarParaSiguienteToken();
+    void reportarError(string lexema, string descripcion, int lineaError, int columnaError);
+    bool esLetra(char c);
+    bool esDigito(char c);
+    bool esLetraMayuscula(char c);
+    bool esCaracterValido(char c);
+    bool esEspacioBlanco(char c);
 
 public:
     vector<ErrorLexico> errores;
-    AnalizadorLexico(std::string input);
-
-    const std::vector<ErrorLexico>& getErrores() const { return errores; }
-
+    AnalizadorLexico(string input);
     Token nextToken();
+    const vector<ErrorLexico>& getErrores() const { return errores; }
 };
+
 #endif

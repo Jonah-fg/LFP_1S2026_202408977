@@ -11,6 +11,8 @@ Token::Token(TokenType type, std::string lexema, int linea, int columna) {
 string tokenTypeToString(TokenType type) {
 
     static map<TokenType, string> nombres={
+        // Palabras reservadas
+        {TokenType::IDENTIFICADOR, "IDENTIFICADOR"},
         {TokenType::HOSPITAL, "HOSPITAL"},
         {TokenType::PACIENTES, "PACIENTES"},
         {TokenType::MEDICOS, "MEDICOS"},
@@ -20,6 +22,7 @@ string tokenTypeToString(TokenType type) {
         {TokenType::MEDICO, "MEDICO"},
         {TokenType::CITA, "CITA"},
         {TokenType::DIAGNOSTICO, "DIAGNOSTICO"},
+        {TokenType::CON, "CON"},
 
         // Literales
         {TokenType::CADENA, "CADENA"},
@@ -52,9 +55,14 @@ string tokenTypeToString(TokenType type) {
         // Especiales
         {TokenType::END_OF_FILE, "EOF"},
         {TokenType::ERROR, "ERROR"}
-    
+
     };
-    return nombres[type];
+
+    auto it=nombres.find(type);
+    if (it !=nombres.end()) {
+        return it->second;
+    }
+    return "DESCONOCIDO";
 }
 
 

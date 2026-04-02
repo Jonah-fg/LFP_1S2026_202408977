@@ -1,14 +1,13 @@
 HOSPITAL {
     PACIENTES {
-        paciente: "Ana Lopez" [edad: 34, tipo_sangre: "O++"],
-        paciente: "Carlos Mendoza" [edad: 45, tipo_sangre: "A-"]
-    },
-
+        paciente: "Claudia Rojas" [edad: 42, tipo_sangre: "A+", habitacion: 205],
+    };
     MEDICOS {
-        medico: "Dr. Roberto Juarez" [especialidad: CARDIOLOGIA, codigo: "MED-001"]
-    },
-
+        medico: "Dra. Verónica Paz" [especialidad: MEDICINA_GENERAL, codigo: "MED-001"],
+    };
     CITAS {
-        cita: "Ana Lopez" con "Dr. Roberto Juarez" [fecha: 2025-13-45, hora: 25:00]
-    }
-}
+        cita: "Claudia Rojas" con "Dra. Verónica Paz" [fecha: 2025-04-20, hora: 10:00],
+    };
+    DIAGNOSTICOS {
+    };
+};

@@ -5,3 +5,4 @@
         this->linea = linea;
         this->columna = columna;
     }
+

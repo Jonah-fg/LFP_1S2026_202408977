@@ -12,8 +12,9 @@ enum class TokenType {
     DIAGNOSTICOS,   
     PACIENTE,       
     MEDICO,         
-    CITA,           
-    DIAGNOSTICO,    
+    CITA,
+    DIAGNOSTICO,
+    CON,
 
     // --- Literales y Valores ---
     CADENA,         
@@ -63,3 +64,4 @@ public:
 };
 string tokenTypeToString(TokenType type);
 #endif
+

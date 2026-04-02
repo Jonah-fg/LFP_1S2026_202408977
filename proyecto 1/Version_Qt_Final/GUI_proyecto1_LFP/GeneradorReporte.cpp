@@ -691,3 +691,4 @@ void GeneradorReporte::generarTodosReportes() {
     generarArchivoDot();
     cout << "Todos los reportes generados exitosamente" << endl;
 }
+

@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "GeneradorReporte.h"
+#include "AnalizadorLexico.h"
 #include "ui_mainwindow.h"
 #include <QFileDialog>
 #include <QMessageBox>
@@ -22,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     QStringList headersErrores = {"No.", "Lexema", "Tipo Error", "Descripción", "Línea", "Columna", "Gravedad"};
     ui->tablaErrores->setHorizontalHeaderLabels(headersErrores);
 
-    std::cout << "Constructor terminado" << std::endl;
+    std::cout <<"Constructor terminado" << std::endl;
 }
 
 MainWindow::~MainWindow()
@@ -34,17 +35,22 @@ MainWindow::~MainWindow()
     std::cout << "Destructor terminado" << std::endl;
 }
 
+void MainWindow::mostrarErroresSintacticos(const std::vector<ErrorSintactico>& erroresSintacticos) {
+    for (const auto& error : erroresSintacticos) {
+        ErrorLexico err(error.lexema, error.linea, error.columna);
+        err.descripcion =error.mensaje;
+        err.tipoError="Sintáctico";
+        err.gravedad="ERROR";
+        erroresActuales.push_back(err);
+    }
+}
+
 void MainWindow::on_btnCargarArchivo_clicked()
 {
     std::cout << "Click en Cargar Archivo" << std::endl;
-
-    QString archivo = QFileDialog::getOpenFileName(this,
-                                                   "Abrir archivo .med",
-                                                   "",
-                                                   "Archivos MedLang (*.med)");
+    QString archivo = QFileDialog::getOpenFileName(this,"Abrir archivo .med", "", "Archivos MedLang (*.med)");
 
     std::cout << "Archivo seleccionado: " << archivo.toStdString() << std::endl;
-
     if (archivo.isEmpty()) {
         std::cout << "Archivo vacío, cancelando" << std::endl;
         return;
@@ -82,6 +88,7 @@ void MainWindow::on_btnCargarArchivo_clicked()
     std::cout << "Carga completada exitosamente" << std::endl;
 }
 
+
 void MainWindow::on_btonAnalizar_clicked()
 {
     std::cout << "=== Iniciando análisis ===" << std::endl;
@@ -108,7 +115,7 @@ void MainWindow::on_btonAnalizar_clicked()
     std::cout << "Iniciando tokenización..." << std::endl;
 
     Token tok = lexer.nextToken();
-    int tokenCount = 0;
+    int tokenCount =0;
     while (tok.type != TokenType::END_OF_FILE) {
         tokensActuales.push_back(tok);
         tokenCount++;
@@ -116,12 +123,10 @@ void MainWindow::on_btonAnalizar_clicked()
     }
 
     std::cout << "Tokenización completada: " << tokenCount << " tokens" << std::endl;
-
     erroresActuales = lexer.errores;
-
     std::cout << "Errores encontrados: " << erroresActuales.size() << std::endl;
 
-    // LLENAR TABLA DE TOKENS
+    //TABLA DE TOKENS
     std::cout << "Llenando tabla de tokens..." << std::endl;
     ui->tablaTokens->setRowCount(tokensActuales.size());
     for (size_t i = 0; i < tokensActuales.size(); i++) {
@@ -149,17 +154,50 @@ void MainWindow::on_btonAnalizar_clicked()
         ui->tablaErrores->setItem(i, 6, new QTableWidgetItem(QString::fromStdString(e.gravedad)));
     }
 
-    // Ajustar ancho de columnas
+    if (!tokensActuales.empty()) {
+        parser=new Parser(tokensActuales);
+        parser->parsearHospital();
+
+        if (!parser->erroresSintacticos.empty()) {
+            int erroresSintacticosCount=parser->erroresSintacticos.size();
+
+            for (const auto& err : parser->erroresSintacticos) {
+                ErrorLexico e(err.lexema, err.linea, err.columna);
+                e.descripcion = err.mensaje;
+                e.tipoError ="Sintáctico";
+                e.gravedad="ERROR";
+                erroresActuales.push_back(e);
+            }
+
+            int filaInicio =ui->tablaErrores->rowCount();
+            ui->tablaErrores->setRowCount(filaInicio + erroresSintacticosCount);
+
+            for (int i=0; i< parser->erroresSintacticos.size(); i++) {
+                int fila =filaInicio+i;
+                ErrorSintactico& e=parser->erroresSintacticos[i];
+
+                ui->tablaErrores->setItem(fila, 0, new QTableWidgetItem(QString::number(fila + 1)));
+                ui->tablaErrores->setItem(fila, 1, new QTableWidgetItem(QString::fromStdString(e.lexema)));
+                ui->tablaErrores->setItem(fila, 2, new QTableWidgetItem("Sintáctico"));
+                ui->tablaErrores->setItem(fila, 3, new QTableWidgetItem(QString::fromStdString(e.mensaje)));
+                ui->tablaErrores->setItem(fila, 4, new QTableWidgetItem(QString::number(e.linea)));
+                ui->tablaErrores->setItem(fila, 5, new QTableWidgetItem(QString::number(e.columna)));
+                ui->tablaErrores->setItem(fila, 6, new QTableWidgetItem("ERROR"));
+            }
+            std::cout << "Errores sintácticos encontrados: " << parser->erroresSintacticos.size() << std::endl;
+        }
+    }
     ui->tablaTokens->resizeColumnsToContents();
     ui->tablaErrores->resizeColumnsToContents();
 
-    QString mensaje = "Análisis léxico completado:\n"
-                      + QString::number(tokensActuales.size()) + " tokens encontrados\n"
-                      + QString::number(erroresActuales.size()) + " errores léxicos";
+    QString mensaje = "Análisis completado:\n" + QString::number(tokensActuales.size()) + " tokens encontrados\n" + QString::number(erroresActuales.size()) + " errores encontrados";
 
     std::cout << "Análisis completado exitosamente" << std::endl;
     QMessageBox::information(this, "Resultado", mensaje);
+
 }
+
+
 
 void MainWindow::on_btonGenerarReportes_clicked()
 {
@@ -171,10 +209,9 @@ void MainWindow::on_btonGenerarReportes_clicked()
         return;
     }
 
-    if (!erroresActuales.empty()) {
+    if (!erroresActuales.empty()|| (parser && !parser->erroresSintacticos.empty())) {
         std::cout << "Error: hay errores léxicos" << std::endl;
-        QMessageBox::warning(this, "Error",
-                             "Hay errores léxicos. Corrígelos antes de generar reportes");
+        QMessageBox::warning(this, "Error", "Hay errores léxicos. Corrígelos antes de generar reportes");
         return;
     }
 
@@ -191,8 +228,13 @@ void MainWindow::on_btonGenerarReportes_clicked()
 
     if (!parser->parsearHospital()) {
         std::cout << "Error en parseo" << std::endl;
-        QMessageBox::warning(this, "Error",
-                             "Error en análisis sintáctico. Revisa la consola");
+        QMessageBox::warning(this, "Error", "Error en análisis sintctico. Revisa la consola");
+        return;
+    }
+
+    if (!parser->erroresSintacticos.empty()) {
+        mostrarErroresSintacticos(parser->erroresSintacticos);
+        QMessageBox::warning(this, "Error", "Hay erores sintácticos. Revia la tabla de errores.");
         return;
     }
 
@@ -201,29 +243,17 @@ void MainWindow::on_btonGenerarReportes_clicked()
     std::cout << "Médicos: " << parser->medicos.size() << std::endl;
     std::cout << "Citas: " << parser->citas.size() << std::endl;
     std::cout << "Diagnósticos: " << parser->diagnosticos.size() << std::endl;
-
     std::cout << "Creando generador de reportes..." << std::endl;
 
     // GENERAR REPORTES
-    GeneradorReporte generador(parser->pacientes,
-                               parser->medicos,
-                               parser->citas,
-                               parser->diagnosticos,
-                               "Hospital General");
-
+    GeneradorReporte generador(parser->pacientes, parser->medicos, parser->citas, parser->diagnosticos, "Hospital General");
     std::cout << "Generando todos los reportes..." << std::endl;
 
     generador.generarTodosReportes();
 
     std::cout << "Reportes generados exitosamente" << std::endl;
 
-    QMessageBox::information(this, "Éxito",
-                             "Reportes generados:\n"
-                             "- reporte1_pacientes.html\n"
-                             "- reporte2_medicos.html\n"
-                             "- reporte3_citas.html\n"
-                             "- reporte4_estadistico.html\n\n"
-                             "Abre los archivos desde la carpeta del proyecto");
+    QMessageBox::information(this, "Éxito", "Reportes generados:\n" "- reporte1_pacienes.html\n" "- reporte2_medicos.html\n" "- reporte3_citas.html\n" "- reporte4_estadistico.html\n\n" "Abre los archivos desde la carpta del proyecto");
 }
 
 
@@ -233,22 +263,20 @@ void MainWindow::on_btonDiagrama_clicked()
     std::cout << "=== Iniciando generación de diagrama DOT ===" << std::endl;
 
     if (tokensActuales.empty()) {
-        std::cout << "Error: tokens vacíos" << std::endl;
+        std::cout << "Error: tokens vacíos"<< std::endl;
         QMessageBox::warning(this, "Error", "Primero analiza el archivo");
         return;
     }
 
     if (!erroresActuales.empty()) {
         std::cout << "Error: hay errores léxicos" << std::endl;
-        QMessageBox::warning(this, "Error",
-                             "Hay errores léxicos. Corrígelos antes de generar el diagrama");
+        QMessageBox::warning(this, "Error", "Hay errores léxicos. Corígelos antes de generar el diagrama");
         return;
     }
 
     std::cout << "Tokens disponibles: " << tokensActuales.size() << std::endl;
 
-    // Si no hay parser, crearlo
-    if (parser == nullptr) {
+    if (parser==nullptr) {
         std::cout << "Creando parser..." << std::endl;
         parser = new Parser(tokensActuales);
         std::cout << "Iniciando parseo..." << std::endl;
@@ -259,23 +287,14 @@ void MainWindow::on_btonDiagrama_clicked()
     std::cout << "Creando generador de reportes..." << std::endl;
 
     // Generar el diagrama DOT
-    GeneradorReporte generador(parser->pacientes,
-                               parser->medicos,
-                               parser->citas,
-                               parser->diagnosticos,
-                               "Hospital General");
+    GeneradorReporte generador(parser->pacientes, parser->medicos, parser->citas, parser->diagnosticos, "Hospital General");
 
     std::cout << "Generando archivo DOT..." << std::endl;
 
-    // Nota: Asegúrate que generarArchivoDot() sea público en GeneradorReporte
-    // Por ahora usamos generarTodosReportes() que también genera el DOT
     generador.generarTodosReportes();
 
     std::cout << "Diagrama DOT generado: hospital.dot" << std::endl;
 
-    QMessageBox::information(this, "Éxito",
-                             "Diagrama DOT generado: hospital.dot\n"
-                             "Para visualizar usa el comando:\n"
-                             "dot -Tpng hospital.dot -o hospital.png");
+    QMessageBox::information(this, "Éxito", "Diagrama DOT generado: hospital.dot\n" "Para visalizar usa el comando:\n" "dot -Tpng hospital.dot -o hospital.png");
 }
 
