@@ -1,0 +1,19 @@
+HOSPITAL {
+    PACIENTES {
+        paciente: "A" [edad: 1, tipo_sangre: "A+", habitacion: 1],
+        paciente: "Z" [edad: 120, tipo_sangre: "O-", habitacion: 999],
+        paciente: "Nombre Muy Largo Con Muchas Palabras" [edad: 99, tipo_sangre: "AB+", habitacion: 500],
+    };
+    MEDICOS {
+        medico: "Dr. A" [especialidad: MEDICINA_GENERAL, codigo: "AAA-001"],
+        medico: "Dra. Z" [especialidad: CARDIOLOGIA, codigo: "ZZZ-999"],
+    };
+    CITAS {
+        cita: "A" con "Dr. A" [fecha: 2025-01-01, hora: 00:00],
+        cita: "Z" con "Dra. Z" [fecha: 2025-12-31, hora: 23:59],
+    };
+    DIAGNOSTICOS {
+        diagnostico: "A" [condicion: "A", medicamento: "A", dosis: DIARIA],
+        diagnostico: "Z" [condicion: "Z", medicamento: "Z", dosis: SEMANAL],
+    };
+};

@@ -44,13 +44,13 @@ string tokenTypeToString(TokenType type) {
         {TokenType::SEMANAL, "SEMANAL"},
 
         // Símbolos
-        {TokenType::LLAVE_ABRE, "{"},
-        {TokenType::LLAVE_CIERRA, "}"},
-        {TokenType::CORCHETE_ABRE, "["},
-        {TokenType::CORCHETE_CIERRA, "]"},
-        {TokenType::DOS_PUNTOS, ":"},
-        {TokenType::COMA, ","},
-        {TokenType::PUNTO_COMA, ";"},
+        {TokenType::LLAVE_ABRE, "LLAVE_ABRE"},
+        {TokenType::LLAVE_CIERRA, "LLAVE_CIERRA"},
+        {TokenType::CORCHETE_ABRE, "CORCHETE_ABRE"},
+        {TokenType::CORCHETE_CIERRA, "CORCHETE_CIERRA"},
+        {TokenType::DOS_PUNTOS, "DOS_PUNTOS"},
+        {TokenType::COMA, "COMA"},
+        {TokenType::PUNTO_COMA, "PUNTO_COMA"},
 
         // Especiales
         {TokenType::END_OF_FILE, "EOF"},

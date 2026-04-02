@@ -1,0 +1,19 @@
+HOSPITAL {
+    PACIENTES {
+        paciente: "Paciente 1" [edad: 30, tipo_sangre: "O+", habitacion: 101],
+    };
+    MEDICOS {
+        medico: "Dr. Cardio" [especialidad: CARDIOLOGIA, codigo: "CAR-001"],
+        medico: "Dra. Neuro" [especialidad: NEUROLOGIA, codigo: "NEU-002"],
+        medico: "Dr. Pedia" [especialidad: PEDIATRIA, codigo: "PED-003"],
+        medico: "Dra. Ciru" [especialidad: CIRUGIA, codigo: "CIR-004"],
+        medico: "Dr. Medicina" [especialidad: MEDICINA_GENERAL, codigo: "MED-005"],
+        medico: "Dra. Onco" [especialidad: ONCOLOGIA, codigo: "ONC-006"],
+    };
+    CITAS {
+        cita: "Paciente 1" con "Dr. Cardio" [fecha: 2025-05-01, hora: 09:00],
+    };
+    DIAGNOSTICOS {
+        diagnostico: "Paciente 1" [condicion: "Cardiopatía", medicamento: "Aspirina 100mg", dosis: DIARIA],
+    };
+};

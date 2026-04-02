@@ -1,0 +1,14 @@
+HOSPITAL {
+    PACIENTES {
+        paciente: "Maria Garcia
+    };
+    MEDICOS {
+        medico: "Dr. Roberto Juarez" [especialidad: CARDIOLOGIA, codigo: "MED-001"],
+    };
+    CITAS {
+        cita: "Maria Garcia" con "Dr. Roberto Juarez" [fecha: 2025-04-10, hora: 09:00],
+    };
+    DIAGNOSTICOS {
+        diagnostico: "Maria Garcia" [condicion: "Hipertension", medicamento: "Losartan 50mg", dosis: DIARIA],
+    };
+};

@@ -1,0 +1,14 @@
+HOSPITAL {
+    PACIENTES {
+        paciente: "María García" [edad: 34, tipo_sangre: "A+", habitacion: 302],
+    };
+    MEDICOS {
+        medico: "Dr. Roberto Juárez" [especialidad: CARDIOLOGIA, codigo: "MED-001"],
+    };
+    CITAS {
+        cita: "María García" con "Dr. Roberto Juárez" [fecha: 2025-13-10, hora: 09:00],
+    };
+    DIAGNOSTICOS {
+        diagnostico: "María García" [condicion: "Hipertensión", medicamento: "Losartán 50mg", dosis: DIARIA],
+    };
+};

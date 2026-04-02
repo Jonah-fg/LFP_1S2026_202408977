@@ -32,7 +32,7 @@ bool Parser::coincidir(TokenType tipoEsperado) {
 bool Parser::validarTipoSangre(const string& sangre) {
     string sangreSinComillas= sangre;
     if (sangreSinComillas.front()=='"' && sangreSinComillas.back() == '"') {
-        sangreSinComillas = sangreSinComillas.substr(1, sangreSinComillas.length() - 2);
+        sangreSinComillas =sangreSinComillas.substr(1, sangreSinComillas.length() - 2);
     }
     set<string> tiposValidos ={"A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"};
     return tiposValidos.find(sangreSinComillas) != tiposValidos.end();
@@ -284,12 +284,6 @@ void Parser::parsearPacientes() {
 
             if (!encontreTipoSangre && !tipoSangreInvalida) {
                 reportarError("Paciente sin tipo de sangre especificado", Token(TokenType::ERROR, "", lineaPaciente, 0));
-            }
-
-            if (encontreEdad && encontreTipoSangre && !edadInvalida && !tipoSangreInvalida) {
-                Paciente paciente(nombre, edad, tipoSangre, lineaPaciente);
-                pacientes.push_back(paciente);
-                cout << " → Paciente agregado: " << nombre<< ", " << edad<< " años, sangre " << tipoSangre << endl;
             }
         }
         else {

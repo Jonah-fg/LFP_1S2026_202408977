@@ -3,10 +3,12 @@
 
 #include <string>
 #include <vector>
+#include "ErrorLexico.h"
 #include "Paciente.h"
 #include "Medico.h"
 #include "Cita.h"
 #include "Diagnostico.h"
+#include <ctime>
 
 using namespace std;
 class GeneradorReporte {
@@ -36,6 +38,7 @@ private:
     string obtenerMedicamentoMasFrecuente();
     string obtenerEspecialidadMayorCarga(int& maxCitas, string& medicoNombre);
     float calcularPromedioEdad();
+    bool esFechaFutura(const string& fecha);
 
     struct EstadisticaEspecialidad {
         string nombre;
@@ -48,8 +51,10 @@ private:
 
 public:
     GeneradorReporte(vector<Paciente> pacientes, vector<Medico> medicos, vector<Cita> citas, vector<Diagnostico> diagnosticos, string nombreHospital);
-    void generarTodosReportes();
+    void generarTodosReportes(const vector<ErrorLexico>& errores=vector<ErrorLexico>());
     void generarArchivoDot();
+    void convertirDotAPNG();
+    void generarHTMLErrores(const vector<ErrorLexico>& errores);
 };
 #endif
 

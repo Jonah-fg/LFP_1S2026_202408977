@@ -42,5 +42,6 @@ private:
     std::vector<Token> tokensActuales;
     std::vector<ErrorLexico> erroresActuales;
     Parser* parser;
+    std::string nombreHospitalActual;
 };
 #endif // MAINWINDOW_H

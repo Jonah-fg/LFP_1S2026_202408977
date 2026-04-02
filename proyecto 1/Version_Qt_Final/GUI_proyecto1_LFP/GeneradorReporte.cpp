@@ -13,6 +13,42 @@ GeneradorReporte::GeneradorReporte(vector<Paciente> pacientes, vector<Medico> me
     this->nombreHospital =nombreHospital;
 }
 
+bool GeneradorReporte::esFechaFutura(const string& fecha) {
+    time_t t=time(nullptr);
+    tm* ahora = localtime(&t);
+
+    int anioActual=ahora->tm_year+1900;
+    int mesActual =ahora->tm_mon +1;
+    int diaActual=ahora->tm_mday;
+
+    int anioCita;
+    int mesCita;
+    int diaCita;
+    char guion1;
+    char guion2;
+
+    istringstream ss(fecha);
+    ss >> anioCita >> guion1 >> mesCita >> guion2 >> diaCita;
+
+    if (anioCita>anioActual) {
+        return true;
+    }
+    else if (anioCita<anioActual) {
+        return false;
+    }
+    else {
+        if (mesCita> mesActual) {
+            return true;
+        }
+        else if (mesCita<mesActual) {
+            return false;
+        }
+        else {
+            return (diaCita>diaActual);
+        }
+    }
+}
+
 string GeneradorReporte::escaparParaGraphviz(string texto) {
     string resultado;
     for (char c :texto) {
@@ -115,7 +151,7 @@ float GeneradorReporte::calcularPromedioEdad() {
     }
 
     int sumaEdades= 0;
-    for (int i=0; i <pacientes.size(); i++) {
+    for (int i=0; i<pacientes.size(); i++) {
         sumaEdades+= pacientes[i].edad;
     }
     return (float)sumaEdades/ pacientes.size();
@@ -261,8 +297,12 @@ string GeneradorReporte::obtenerEstadoCita(Cita cita) {
     if (ConflictoCita(cita)) {
         return "CONFLICTO";
     }
+    if (esFechaFutura(cita.fecha)) {
+        return "PENDIENTE";
+    }
     return "CONFIRMADA";
 }
+
 
 void GeneradorReporte::generarHTMLReporte1() {
     ofstream archivo("reporte1_pacientes.html");
@@ -346,8 +386,7 @@ void GeneradorReporte::generarHTMLReporte2() {
     archivo << "        table { border-collapse: collapse; width: 100%; margin-top: 20px; }\n";
     archivo << "        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }\n";
     archivo << "        th { background-color: #2c3e50; color: white; }\n";
-    archivo << "        tr:nth-child(even) { background-color: #f2f2f2; }\n";
-    archivo << "        .baja{ background-color: #cce5ff; }\n";
+    archivo << "        .baja { background-color: #cce5ff; }\n";
     archivo << "        .normal { background-color: #d4edda; }\n";
     archivo << "        .alta { background-color: #fff3cd; }\n";
     archivo << "        .saturada { background-color: #f8d7da; }\n";
@@ -375,16 +414,21 @@ void GeneradorReporte::generarHTMLReporte2() {
         string nivel=obtenerNivelCarga(numCitas);
 
         string clase;
-        if (nivel=="BAJA")
+        if (nivel =="BAJA") {
             clase ="baja";
-
-        else if (nivel == "NORMAL")
-            clase ="normal";
-
-        else if (nivel =="ALTA")
-            clase ="alta";
-
-        else clase="saturada";
+        }
+        else if (nivel =="NORMAL") {
+            clase = "normal";
+        }
+        else if (nivel=="ALTA") {
+            clase = "alta";
+        }
+        else if (nivel== "SATURADA") {
+            clase ="saturada";
+        }
+        else {
+            clase="";
+        }
 
         archivo << "         <tr class=\"" << clase << "\">\n";
         archivo << "              <td>" << med.nombre << "</td>\n";
@@ -421,6 +465,7 @@ void GeneradorReporte::generarHTMLReporte3() {
     archivo << "        th { background-color: #2c3e50; color: white; }\n";
     archivo << "        .confirmada { background-color: #d4edda; }\n";
     archivo << "        .conflicto { background-color: #f8d7da; }\n";
+    archivo << "        .pendiente { background-color: #fff3cd; }\n";
     archivo << "    </style>\n";
     archivo << "</head>\n";
     archivo << "<body>\n";
@@ -475,8 +520,7 @@ void GeneradorReporte::generarHTMLReporte4() {
     int totalCitas =citas.size();
     int citasConflicto =contarCitasConConflicto();
     int pacientesConDiagnostico=contarPacientesConDiagnostico();
-    float porcentajeDiagnostico =(totalPacientes > 0) ? 
-        (pacientesConDiagnostico * 100.0) / totalPacientes : 0;
+    float porcentajeDiagnostico =(totalPacientes > 0) ? (pacientesConDiagnostico * 100.0) / totalPacientes : 0;
     string medicamentoFrecuente=obtenerMedicamentoMasFrecuente();
     
     int maxCitasEspecialidad;
@@ -611,7 +655,6 @@ void GeneradorReporte::generarHTMLReporte4() {
 
 void GeneradorReporte::generarArchivoDot() {
     ofstream archivo("hospital.dot");
-
     archivo << "digraph Hospital {\n";
     archivo << "    graph [charset=\"UTF-8\"];\n";
     archivo << "    rankdir=TB;\n";
@@ -681,7 +724,82 @@ void GeneradorReporte::generarArchivoDot() {
 }
 
 
-void GeneradorReporte::generarTodosReportes() {
+void GeneradorReporte::generarHTMLErrores(const vector<ErrorLexico>& errores) {
+    ofstream archivo("errores.html");
+
+    archivo << "<!DOCTYPE html>\n";
+    archivo << "<html>\n";
+    archivo << "<head>\n";
+    archivo << "    <meta charset=\"UTF-8\">\n";
+    archivo << "    <title>Reporte de Errores Léxicos</title>\n";
+    archivo << "    <style>\n";
+    archivo << "        body { font-family: Arial, sans-serif; margin: 20px; }\n";
+    archivo << "        h1 { color: #c0392b; text-align: center; }\n";
+    archivo << "        table { border-collapse: collapse; width: 100%; margin-top: 20px; }\n";
+    archivo << "        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }\n";
+    archivo << "        th { background-color: #c0392b; color: white; }\n";
+    archivo << "        tr:nth-child(even) { background-color: #f2f2f2; }\n";
+    archivo << "        .critico { background-color: #f8d7da; }\n";
+    archivo << "        .error { background-color: #fff3cd; }\n";
+    archivo << "    </style>\n";
+    archivo << "</head>\n";
+    archivo << "<body>\n";
+
+    archivo << "    <h1>Reporte de Errores Léxicos</h1>\n";
+    archivo << "    <p>Total de errores encontrados: " << errores.size() << "</p>\n";
+    archivo << "    <table>\n";
+    archivo << "        <tr>\n";
+    archivo << "            <th>No.</th>\n";
+    archivo << "            <th>Lexema</th>\n";
+    archivo << "            <th>Tipo de Error</th>\n";
+    archivo << "            <th>Descripción</th>\n";
+    archivo << "            <th>Línea</th>\n";
+    archivo << "            <th>Columna</th>\n";
+    archivo << "            <th>Gravedad</th>\n";
+    archivo << "        </tr>\n";
+
+    for (int i=0; i <errores.size(); i++) {
+        const ErrorLexico& e=errores[i];
+        string clase=(e.gravedad == "CRÍTICO") ? "critico" : "error";
+
+        archivo << "         <tr class=\"" << clase << "\">\n";
+        archivo << "             <td>" << (i + 1) << "</td>\n";
+        archivo << "             <td>" << escaparParaGraphviz(e.caracter) << "</td>\n";
+        archivo << "             <td>" << e.tipoError << "</td>\n";
+        archivo << "             <td>" << e.descripcion << "</td>\n";
+        archivo << "             <td>" << e.linea << "</td>\n";
+        archivo << "             <td>" << e.columna << "</td>\n";
+        archivo << "             <td>" << e.gravedad << "</td>\n";
+        archivo << "         </tr>\n";
+    }
+    archivo << "     </table>\n";
+    archivo << "</body>\n";
+    archivo << "</html>\n";
+    archivo.close();
+    cout << " Reporte de errores: errores.html" << endl;
+}
+
+
+void GeneradorReporte::convertirDotAPNG(){
+
+    string comando = "dot -Tpng hospital.dot -o hospital.png";
+    cout << "Convirtiendo diagrama a PNG..." << endl;
+
+    int resultado= system(comando.c_str());
+    if (resultado ==0) {
+        cout << "Diagrama convertido exitosamente: hospital.png" << endl;
+    }
+    else {
+        cout << " Error al convertir el diagrama. Asegurate de tener Graphviz instalado." << endl;
+        cout << " Para instalar Graphviz:" << endl;
+        cout << "   - Windows: https://graphviz.org/download/" << endl;
+        cout << "   - Linux: sudo apt install graphviz" << endl;
+        cout << "   - macOS: brew install graphviz" << endl;
+    }
+}
+
+
+void GeneradorReporte::generarTodosReportes(const vector<ErrorLexico>& errores) {
     cout << "\n--- GENERANDO REPORTES ---" << endl;
 
     generarHTMLReporte1();
@@ -689,6 +807,10 @@ void GeneradorReporte::generarTodosReportes() {
     generarHTMLReporte3();
     generarHTMLReporte4();
     generarArchivoDot();
+    convertirDotAPNG();
+    if (!errores.empty()){
+        generarHTMLErrores(errores);
+    }
     cout << "Todos los reportes generados exitosamente" << endl;
 }
 

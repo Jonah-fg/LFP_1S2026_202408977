@@ -90,10 +90,11 @@ bool AnalizadorLexico::esLetraMayuscula(char c) {
 bool AnalizadorLexico::esCaracterValido(char c) {
     if (isalnum(c) || c == ' ' || c == '\n' || c == '\t' || c == '\r')
         return true;
-    if (c == '{' || c == '}' || c == '[' || c == ']' || c == ':' || c == ',' || c == ';' || c == '"' || c == '-')
+    if (c == '{' || c == '}'|| c == '[' || c == ']' || c == ':' || c == ',' || c == ';' || c == '"' || c == '-')
         return true;
     return false;
 }
+
 
 Token AnalizadorLexico::nextToken() {
     while (posicion < input.length() && isspace(input[posicion])) {
@@ -113,7 +114,7 @@ Token AnalizadorLexico::nextToken() {
     reiniciarParaSiguienteToken();
     char c =input[inicioLexema];
     Estado estadoActual = Estado::INICIO;
-    string lexemaActual = "";
+    string lexemaActual="";
     bool aceptado =false;
     TokenType tipoToken=TokenType::ERROR;
 
@@ -194,6 +195,7 @@ Token AnalizadorLexico::nextToken() {
             break;
         }
 
+
         case Estado::LEYENDO_ID: {
             if (esLetra(currentChar) || esDigito(currentChar)) {
                 siguienteCaracter();
@@ -231,237 +233,131 @@ Token AnalizadorLexico::nextToken() {
         case Estado::LEYENDO_CODIGO_ID: {
             if (esDigito(currentChar)) {
                 siguienteCaracter();
-            } else {
+            }
+            else {
                 aceptado =true;
                 string codigo =input.substr(inicioLexema, posicion- inicioLexema);
 
-                bool valido =false;
-                if (codigo.length()>= 5 && isalpha(codigo[0]) && isalpha(codigo[1]) && isalpha(codigo[2]) && codigo[3] == '-') {
-                    valido = true;
-                    for (int i=4; i < codigo.length(); i++) {
-                        if (!isdigit(codigo[i])){
-                            valido =false;
+                bool valido = false;
+                if (codigo.length() >= 5){
+                    bool letrasValidas=isalpha(codigo[0]) && isalpha(codigo[1]) && isalpha(codigo[2]);
+                    bool guionValido=(codigo[3] == '-');
+                    bool tieneDigitos=false;
+                    for (int i=4; i<codigo.length(); i++) {
+                        if (isdigit(codigo[i])) {
+                            tieneDigitos = true;
+                        }
+                        else {
+                            tieneDigitos= false;
                             break;
                         }
                     }
+                    valido=(letrasValidas && guionValido && tieneDigitos);
                 }
                 if (valido) {
                     tipoToken=TokenType::CODIGO_ID;
                 }
                 else {
-                    reportarError(codigo, "Formato de código ID nválido. Debe ser: LETRAS-LETRAS-LETRAS-GUION-DGITOS (ej: MED-001)", lineaInicioLexema, columnaInicioLexema);
+                    reportarError(codigo, "Formato de código ID inválido. Debe ser: 3 letras + guión + dígitos (ej: MED-001)", lineaInicioLexema, columnaInicioLexema);
                     tipoToken = TokenType::ERROR;
                 }
             }
             break;
         }
+
 
         case Estado::LEYENDO_NUMERO: {
             if (esDigito(currentChar)) {
                 siguienteCaracter();
             }
             else if (currentChar == '-') {
-                cout << "\n🔵 Encontrado '-' después de número, cambiando a LEYENDO_FECHA" << endl;
+                cout << "\nEncontrado '-' después de número, cambiando a LEYENDO_FECHA" << endl;
                 estadoActual = Estado::LEYENDO_FECHA;
                 siguienteCaracter();
             }
-            else if (currentChar == ':') {
-                estadoActual = Estado::LEYENDO_HORA;
+            else if (currentChar ==':') {
+                estadoActual=Estado::LEYENDO_HORA;
                 siguienteCaracter();
             }
             else {
-                aceptado = true;
+                aceptado =true;
                 tipoToken = TokenType::NUMERO;
             }
             break;
         }
 
 
-        case Estado::LEYENDO_FECHA_ANIO: {
-            if (esDigito(currentChar)) {
-                siguienteCaracter();
-            }
-            else if (currentChar == '-') {
-                estadoActual = Estado::LEYENDO_FECHA_MES;
-                siguienteCaracter();
-            }
-            else {
-                aceptado = true;
-                string fecha = input.substr(inicioLexema, posicion - inicioLexema);
-                reportarError(fecha, "Formato de fecha inválido. Se esperaba '-' después del año",
-                              lineaInicioLexema, columnaInicioLexema);
-                tipoToken = TokenType::ERROR;
-            }
-            break;
-        }
-
-
         case Estado::LEYENDO_FECHA: {
-            // Leer todo hasta encontrar un carácter que no sea dígito o '-'
             if (esDigito(currentChar) || currentChar == '-') {
                 siguienteCaracter();
             }
             else {
-                aceptado = true;
-                string fecha = input.substr(inicioLexema, posicion - inicioLexema);
+                aceptado=true;
+                string fecha =input.substr(inicioLexema, posicion - inicioLexema);
 
-                // === DEPURACIÓN DETALLADA ===
-                cout << "\n=== VALIDANDO FECHA ===" << endl;
-                cout << "Fecha: '" << fecha << "'" << endl;
-                cout << "Longitud: " << fecha.length() << endl;
-                cout << "Caracteres: ";
-                for (int i = 0; i < fecha.length(); i++) {
-                    cout << fecha[i] << "(" << (int)fecha[i] << ") ";
-                }
-                cout << endl;
-
-                // Validar formato AAAA-MM-DD
-                bool formatoOk = (fecha.length() == 10);
+                //formato AAAA-MM-DD
+                bool formatoOk =(fecha.length() ==10);
                 if (formatoOk) {
-                    formatoOk = (isdigit(fecha[0]) && isdigit(fecha[1]) && isdigit(fecha[2]) && isdigit(fecha[3]) &&
-                                 fecha[4] == '-' &&
-                                 isdigit(fecha[5]) && isdigit(fecha[6]) &&
-                                 fecha[7] == '-' &&
-                                 isdigit(fecha[8]) && isdigit(fecha[9]));
+                    formatoOk=(isdigit(fecha[0]) && isdigit(fecha[1]) && isdigit(fecha[2]) && isdigit(fecha[3]) && fecha[4] == '-' &&  isdigit(fecha[5]) && isdigit(fecha[6]) && fecha[7] == '-' && isdigit(fecha[8]) && isdigit(fecha[9]));
                 }
-
                 cout << "Formato válido: " << (formatoOk ? "SI" : "NO") << endl;
 
                 if (formatoOk) {
-                    int mes = stoi(fecha.substr(5, 2));
-                    int dia = stoi(fecha.substr(8, 2));
-                    int anio = stoi(fecha.substr(0, 4));
+                    int mes =stoi(fecha.substr(5, 2));
+                    int dia =stoi(fecha.substr(8, 2));
+                    int anio=stoi(fecha.substr(0, 4));
 
                     cout << "Año: " << anio << ", Mes: " << mes << ", Día: " << dia << endl;
-
-                    bool rangoOk = (mes >= 1 && mes <= 12 && dia >= 1 && dia <= 31);
+                    bool rangoOk=(mes >= 1 && mes <= 12 && dia >= 1 && dia <= 31);
                     cout << "Rango válido: " << (rangoOk ? "SI" : "NO") << endl;
 
                     if (rangoOk) {
                         tipoToken = TokenType::FECHA;
-                        cout << "✅ Fecha VÁLIDA: " << fecha << endl;
-                    } else {
+                        cout << " Fecha VÁLIDA: " << fecha << endl;
+                    }
+                    else {
                         reportarError(fecha, "Fecha inválida: mes o día fuera de rango (Mes: 01-12, Día: 01-31)",
                                       lineaInicioLexema, columnaInicioLexema);
                         tipoToken = TokenType::ERROR;
-                        cout << "❌ Fecha INVÁLIDA (rango)" << endl;
+                        cout << " Fecha INVÁLIDA (rango)" << endl;
                     }
-                } else {
-                    reportarError(fecha, "Formato de fecha inválido. Debe ser AAAA-MM-DD",
-                                  lineaInicioLexema, columnaInicioLexema);
-                    tipoToken = TokenType::ERROR;
-                    cout << "❌ Fecha INVÁLIDA (formato)" << endl;
+                }
+                else {
+                    reportarError(fecha, "Formato de fecha inválido. Debe ser AAAA-MM-DD", lineaInicioLexema, columnaInicioLexema);
+                    tipoToken=TokenType::ERROR;
+                    cout << "Fecha INVÁLIDA (formato)" << endl;
                 }
             }
             break;
         }
 
-
-        case Estado::LEYENDO_FECHA_MES: {
-            if (esDigito(currentChar)) {
-                siguienteCaracter();
-                // Después de leer los 2 dígitos del mes, el siguiente carácter debe ser un guión
-                if ((posicion - inicioLexema) == 7) { // Hemos leído AAAA-MM (7 caracteres)
-                    if (currentChar == '-') {
-                        // Si ya tenemos el guión, pasamos al día
-                        estadoActual = Estado::LEYENDO_FECHA_DIA;
-                        siguienteCaracter();
-                    }
-                    // Si no, seguimos leyendo (podría ser que el día venga sin guión)
-                }
-            }
-            else {
-                // Si terminamos sin encontrar el día, es error
-                aceptado = true;
-                string fecha = input.substr(inicioLexema, posicion - inicioLexema);
-                if (fecha.length() == 7) { // Solo AAAA-MM
-                    // Intentar leer el día del siguiente token
-                    // Esto es complicado, mejor usar otro enfoque
-                }
-                reportarError(fecha, "Formato de fecha inválido",
-                              lineaInicioLexema, columnaInicioLexema);
-                tipoToken = TokenType::ERROR;
-            }
-            break;
-        }
-
-
-        case Estado::LEYENDO_FECHA_DIA: {
-            cout << "DEBUG - Estado: LEYENDO_FECHA_DIA, char: " << currentChar << ", pos: " << posicion << endl;
-            if (esDigito(currentChar)) {
-                siguienteCaracter();
-            }
-            else {
-                aceptado = true;
-                string fecha = input.substr(inicioLexema, posicion - inicioLexema);
-                cout << "DEBUG - Fecha completa capturada: '" << fecha << "', longitud: " << fecha.length() << endl;
-
-                // Validar formato
-                if (fecha.length() == 10 &&
-                    isdigit(fecha[0]) && isdigit(fecha[1]) && isdigit(fecha[2]) && isdigit(fecha[3]) &&
-                    fecha[4] == '-' &&
-                    isdigit(fecha[5]) && isdigit(fecha[6]) &&
-                    fecha[7] == '-' &&
-                    isdigit(fecha[8]) && isdigit(fecha[9])) {
-
-                    int mes = stoi(fecha.substr(5, 2));
-                    int dia = stoi(fecha.substr(8, 2));
-
-                    if (mes >= 1 && mes <= 12 && dia >= 1 && dia <= 31) {
-                        tipoToken = TokenType::FECHA;
-                        cout << "DEBUG - ✅ Fecha VÁLIDA: " << fecha << endl;
-                    } else {
-                        reportarError(fecha, "Fecha inválida: mes o día fuera de rango",
-                                      lineaInicioLexema, columnaInicioLexema);
-                        tipoToken = TokenType::ERROR;
-                        cout << "DEBUG - ❌ Fecha INVÁLIDA (rango): " << fecha << endl;
-                    }
-                } else {
-                    reportarError(fecha, "Formato de fecha inválido. Debe ser AAAA-MM-DD",
-                                  lineaInicioLexema, columnaInicioLexema);
-                    tipoToken = TokenType::ERROR;
-                    cout << "DEBUG - ❌ Fecha INVÁLIDA (formato): " << fecha << endl;
-                }
-            }
-            break;
-        }
 
         case Estado::LEYENDO_HORA: {
-            if (esDigito(currentChar)) {
-                estadoActual = Estado::LEYENDO_HORA_MINUTOS;
+            if (esDigito(currentChar) || currentChar == ':') {
                 siguienteCaracter();
             }
             else {
-                aceptado =true;
-                string hora=input.substr(inicioLexema, posicion - inicioLexema);
-                reportarError(hora, "Formato de hora inválido. Debe ser HH:MM (ej: 09:00)", lineaInicioLexema, columnaInicioLexema);
-                tipoToken=TokenType::ERROR;
-            }
-            break;
-        }
-
-        case Estado::LEYENDO_HORA_MINUTOS: {
-            if (esDigito(currentChar)) {
-                siguienteCaracter();
-            }
-            else {
-                aceptado =true;
+                aceptado=true;
                 string hora=input.substr(inicioLexema, posicion - inicioLexema);
 
-                if (hora.length()==5 && isdigit(hora[0]) && isdigit(hora[1]) && hora[2] == ':' && isdigit(hora[3]) && isdigit(hora[4])) {
+                bool formatoOk=(hora.length() == 5);
+                if (formatoOk) {
+                    formatoOk=(isdigit(hora[0]) && isdigit(hora[1]) && hora[2] == ':' && isdigit(hora[3]) && isdigit(hora[4]));
+                }
 
-                    int horas =stoi(hora.substr(0, 2));
-                    int minutos= stoi(hora.substr(3, 2));
+                if (formatoOk) {
+                    int horas=stoi(hora.substr(0, 2));
+                    int minutos=stoi(hora.substr(3, 2));
 
-                    if (horas>=0 && horas <= 23 && minutos >=0 && minutos<=59) {
-                        tipoToken = TokenType::HORA;
+                    if (horas >=0 && horas<=23 && minutos>=0 && minutos<=59) {
+                        tipoToken =TokenType::HORA;
                     }
                     else {
                         reportarError(hora, "Hora inválida. Use rango 00:00 - 23:59", lineaInicioLexema, columnaInicioLexema);
-                        tipoToken = TokenType::ERROR;
+                        tipoToken=TokenType::ERROR;
                     }
                 }
-                else{
+                else {
                     reportarError(hora, "Formato de hora inválido. Debe ser HH:MM (ej: 09:00)", lineaInicioLexema, columnaInicioLexema);
                     tipoToken = TokenType::ERROR;
                 }
