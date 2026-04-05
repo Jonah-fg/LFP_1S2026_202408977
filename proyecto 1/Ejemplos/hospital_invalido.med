@@ -1,0 +1,14 @@
+HOSPITAL {
+    PACIENTES {
+        paciente: "Ana López" [edad: 30, tipo_sangre: "O++"],        // Error: tipo de sangre inválido
+        paciente: "Pedro Paz" [edad: cuarenta, tipo_sangre: "A+"]   // Error: edad no es número
+    };
+    MEDICOS {
+        medico: "Dr. Juan Pérez" [especialidad: CARDIOLOGO, codigo: "MED-001"],  // Error: especialidad mal escrita
+        medico: "Dra. María López" [especialidad: PEDIATRIA, codigo: "MED-000A"] // Error: código con letra
+    };
+    CITAS {
+        cita: "Ana López" con "Dr. Juan Pérez" [fecha: 2025-13-01, hora: 09:00],  // Error: mes 13 inválido
+        cita: "Pedro Paz" con "Dra. María López" [fecha: 2025-04-10, hora: 25:00]  // Error: hora 25 inválida
+    };
+}

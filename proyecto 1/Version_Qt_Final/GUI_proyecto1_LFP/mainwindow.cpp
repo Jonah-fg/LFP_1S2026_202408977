@@ -14,7 +14,6 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // Configurar tablas
     ui->tablaTokens->setColumnCount(5);
     QStringList headersTokens = {"No.", "Lexema", "Tipo", "Línea", "Columna"};
     ui->tablaTokens->setHorizontalHeaderLabels(headersTokens);
@@ -299,6 +298,6 @@ void MainWindow::on_btonDiagrama_clicked()
     std::cout << "Diagrama DOT generado: hospital.dot" << std::endl;
     std::cout << "Diagrama PNG generado: hospital.png" << std::endl;
 
-    QMessageBox::information(this, "Éxito", "Diagramas generados:\n" "- hospital.dot\n" "- hospital.png\n\n" "Para visualizar el DOT manualmente:\n" "dot -Tpng hospital.dot -o hospital.png");
+    QMessageBox::information(this, "Éxito", "Diagramas generados:\n" "- hospital.dot\n" "- hospital.png\n\n");
 }
 

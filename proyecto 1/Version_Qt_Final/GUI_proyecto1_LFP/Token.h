@@ -24,7 +24,7 @@ enum class TokenType {
     CODIGO_ID, 
     IDENTIFICADOR,
 
-    // --- Enumeraciones (Especialidades) ---
+    // --- Enumeraciones  -----
     CARDIOLOGIA,
     NEUROLOGIA,
     PEDIATRIA,

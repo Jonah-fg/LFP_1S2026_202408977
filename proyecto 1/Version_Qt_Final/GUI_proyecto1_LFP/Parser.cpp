@@ -133,7 +133,6 @@ bool Parser::parsearHospital() {
     else {
         reportarError("Se esperaba '}' para cerrar el bloque HOSPITAL", tokenActual());
     }
-    cout << "\n=== ANÁLISIS SINTÁCTICO COMPLETADO ===" << endl;
     cout << "Pacientes encontrados: " << pacientes.size() << endl;
     cout << "Médicos encontrados: " << medicos.size() << endl;
     cout << "Citas encontradas: " << citas.size() << endl;
@@ -186,7 +185,7 @@ void Parser::parsearPacientes() {
             }
             int edad =-1;
             string tipoSangre="";
-            int habitacion = -1;
+            int habitacion =-1;
             bool encontreEdad=false;
             bool encontreTipoSangre=false;
             bool encontreHabitacion = false;
@@ -240,7 +239,7 @@ void Parser::parsearPacientes() {
                     }
 
                     else if (tokenActual().type==TokenType::NUMERO) {
-                        habitacion = stoi(tokenActual().lexema);
+                        habitacion =stoi(tokenActual().lexema);
                         encontreHabitacion =true;
                         siguienteToken();
                     }
@@ -279,7 +278,6 @@ void Parser::parsearPacientes() {
             if (encontreEdad && encontreTipoSangre && !edadInvalida && !tipoSangreInvalida) {
                 Paciente paciente(nombre, edad, tipoSangre, lineaPaciente);
                 pacientes.push_back(paciente);
-                cout << "→ Paciente agregado: " << nombre << ", " << edad << " años, sangre " << tipoSangre << endl;
             }
 
             if (!encontreTipoSangre && !tipoSangreInvalida) {
@@ -452,7 +450,6 @@ void Parser::parsearMedicos(){
             if (encontreEspecialidad && encontreCodigo && !especialidadInvalida && !codigoInvalido) {
                 Medico medico(nombre, especialidad, codigo, lineaMedico);
                 medicos.push_back(medico);
-                cout << "  → Médico agregado: " << nombre << ", " << especialidad << ", código " << codigo << endl;
             }
         }
         else {

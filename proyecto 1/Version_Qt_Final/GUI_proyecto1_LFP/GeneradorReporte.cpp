@@ -20,7 +20,6 @@ bool GeneradorReporte::esFechaFutura(const string& fecha) {
     int anioActual=ahora->tm_year+1900;
     int mesActual =ahora->tm_mon +1;
     int diaActual=ahora->tm_mday;
-
     int anioCita;
     int mesCita;
     int diaCita;
@@ -49,6 +48,7 @@ bool GeneradorReporte::esFechaFutura(const string& fecha) {
     }
 }
 
+//metodo para que el programa funcione, con ayuda
 string GeneradorReporte::escaparParaGraphviz(string texto) {
     string resultado;
     for (char c :texto) {
@@ -601,7 +601,6 @@ void GeneradorReporte::generarHTMLReporte4() {
     archivo << "                 <td>Especialidad con mayor carga de citas</td>\n";
     archivo << "                 <td>" << especialidadMayorCarga << " — " << medicoEjemplo<< " (" << maxCitasEspecialidad << " citas)</td>\n";
     archivo << "             </tr>\n";
-
     archivo << "             <tr>\n";
     archivo << "                 <td>Promedio de edad de los pacientes</td>\n";
     archivo << "                 <td>" << promedioEdad << " años</td>\n";
@@ -791,10 +790,6 @@ void GeneradorReporte::convertirDotAPNG(){
     }
     else {
         cout << " Error al convertir el diagrama. Asegurate de tener Graphviz instalado." << endl;
-        cout << " Para instalar Graphviz:" << endl;
-        cout << "   - Windows: https://graphviz.org/download/" << endl;
-        cout << "   - Linux: sudo apt install graphviz" << endl;
-        cout << "   - macOS: brew install graphviz" << endl;
     }
 }
 
@@ -806,8 +801,6 @@ void GeneradorReporte::generarTodosReportes(const vector<ErrorLexico>& errores) 
     generarHTMLReporte2();
     generarHTMLReporte3();
     generarHTMLReporte4();
-    generarArchivoDot();
-    convertirDotAPNG();
     if (!errores.empty()){
         generarHTMLErrores(errores);
     }

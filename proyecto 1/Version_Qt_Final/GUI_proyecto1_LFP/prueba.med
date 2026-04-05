@@ -1,16 +1,20 @@
 HOSPITAL {
     PACIENTES {
-        paciente: "María García" [edad: 34, tipo_sangre: "O++", habitacion: 302],
-        paciente: "Carlos Mendoza" [edad: sesenta, tipo_sangre: "O-", habitacion: 410],
-    };
+        paciente: "Ana López" [edad: 30, tipo_sangre: "A+"],
+        paciente: "Carlos Ruiz" [edad: 45, tipo_sangre: "O-"],
+        paciente: "Marta Gil" [edad: 28, tipo_sangre: "B+"]
+    }
     MEDICOS {
-        medico: "Dr. Roberto Juárez" [especialidad: CARDIOLOGIA, codigo: "MED-001"],
-        medico: "Dra. Ana Solís" [especialidad: NEUROLOGIA, codigo: "MED-00X"],
-    };
+        medico: "Dr. Juan Pérez" [especialidad: CARDIOLOGIA, codigo: "CAR-001"],
+        medico: "Dra. Ana Torres" [especialidad: PEDIATRIA, codigo: "PED-002"]
+    }
     CITAS {
-        cita: "María García" con "Dr. Roberto Juárez" [fecha: 2025-13-10, hora: 25:00],
-    };
+        cita: "Ana López" con "Dr. Juan Pérez" [fecha: 2026-05-15, hora: 09:00],
+        cita: "Carlos Ruiz" con "Dr. Juan Pérez" [fecha: 2026-05-15, hora: 09:00],
+        cita: "Marta Gil" con "Dra. Ana Torres" [fecha: 2026-05-16, hora: 10:30]
+    }
     DIAGNOSTICOS {
-        diagnostico: "Carlos Mendoza" [condicion: "Diabetes", medicamento: "Metformina 850mg", dosis: CADA_24_HORAS],
-    };
-};
+        diagnostico: "Ana López" [condicion: "Hipertensión", medicamento: "Enalapril", dosis: DIARIA],
+        diagnostico: "Carlos Ruiz" [condicion: "Diabetes", medicamento: "Metformina", dosis: CADA_12_HORAS]
+    }
+}
