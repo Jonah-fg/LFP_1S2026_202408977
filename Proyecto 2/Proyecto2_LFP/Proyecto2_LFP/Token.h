@@ -40,6 +40,7 @@ public:
     int columna;
 
     Token();
+
     Token(TipoToken t, string lex, int lin, int col);
     string aCadena();
 };

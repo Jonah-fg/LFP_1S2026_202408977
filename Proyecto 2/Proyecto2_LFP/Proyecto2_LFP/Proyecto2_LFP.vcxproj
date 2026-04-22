@@ -128,14 +128,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AnalizadorLexico.cpp" />
+    <ClCompile Include="AnalizadorSintactico.cpp" />
     <ClCompile Include="GestorErrores.cpp" />
+    <ClCompile Include="NodoArbol.cpp" />
     <ClCompile Include="Proyecto2_LFP.cpp" />
     <ClCompile Include="Token.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnalizadorLexico.h" />
+    <ClInclude Include="AnalizadorSintactico.h" />
     <ClInclude Include="GestorErrores.h" />
+    <ClInclude Include="NodoArbol.h" />
     <ClInclude Include="Token.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\..\..\Downloads\AFD.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -3,7 +3,7 @@
 using namespace std;
 
 AnalizadorLexico::AnalizadorLexico(string entrada, GestorErrores* gestor) {
-    fuente = entrada;
+    fuente=entrada;
     pos =0;
     linea=1;
     columna=1;
@@ -18,7 +18,7 @@ char AnalizadorLexico::caracterActual() {
 }
 
 void AnalizadorLexico::avanzar() {
-    if (pos < fuente.length()) {
+    if (pos <fuente.length()) {
         if (fuente[pos]== '\n') {
             linea++;
             columna=1;
@@ -31,7 +31,7 @@ void AnalizadorLexico::avanzar() {
 }
 
 bool AnalizadorLexico::esFin() {
-    return pos >=fuente.length();
+    return pos>=fuente.length();
 }
 
 void AnalizadorLexico::saltarEspacios() {
@@ -43,7 +43,7 @@ void AnalizadorLexico::saltarEspacios() {
 Token AnalizadorLexico::siguienteToken() {
     saltarEspacios();
 
-    if (esFin()) {
+    if (esFin()){
         return Token(FIN_ARCHIVO, "EOF", linea, columna);
     }
 
@@ -51,7 +51,7 @@ Token AnalizadorLexico::siguienteToken() {
     int columnaInicio =columna;
     char c=caracterActual();
 
-    // Estado S0: Inicio - Identificadores y palabras reservadas
+    // Estado S0
     if (isalpha(c)) {
         string lexema="";
         while (!esFin() && (isalpha(caracterActual()) || isdigit(caracterActual()))) {
@@ -93,7 +93,7 @@ Token AnalizadorLexico::siguienteToken() {
         return Token(tipo, lexema, lineaInicio, columnaInicio);
     }
 
-    // Estado S2: Números y fechas
+    // Estado S2
     else if (isdigit(c)) {
         string lexema="";
         while (!esFin() && isdigit(caracterActual())) {
@@ -101,7 +101,6 @@ Token AnalizadorLexico::siguienteToken() {
             avanzar();
         }
 
-        // Intentar reconocer fecha AAAA-MM-DD
         if (lexema.length()==4 && !esFin() && caracterActual()=='-') {
             string fechaLexema=lexema;
             fechaLexema+='-';
@@ -125,7 +124,7 @@ Token AnalizadorLexico::siguienteToken() {
                     digitosDia++;
                 }
 
-                if (digitosDia == 2) {
+                if (digitosDia ==2) {
                     return Token(FECHA, fechaLexema, lineaInicio, columnaInicio);
                 }
                 else {
@@ -134,8 +133,7 @@ Token AnalizadorLexico::siguienteToken() {
                 }
             }
             else {
-                gestorErrores->agregarErrorLexico(fechaLexema, lineaInicio, columnaInicio,
-                    "Formato de fecha invalido (mes incompleto o falta '-')");
+                gestorErrores->agregarErrorLexico(fechaLexema, lineaInicio, columnaInicio, "Forato de fecha invalido (mes incompleto o falta '-')");
                 return Token(DESCONOCIDO, fechaLexema, lineaInicio, columnaInicio);
             }
         }
@@ -144,10 +142,10 @@ Token AnalizadorLexico::siguienteToken() {
         }
     }
 
-    // Estado S3: Cadenas
+    // Estado S3
     else if (c =='"') {
         string lexema="";
-        lexema +='"';
+        lexema+='"';
         avanzar(); 
 
         while (!esFin() && caracterActual() !='"' && caracterActual() != '\n') {
@@ -164,26 +162,26 @@ Token AnalizadorLexico::siguienteToken() {
         return Token(CADENA, lexema, lineaInicio, columnaInicio);
     }
 
-    // Estado S7: Delimitadores
+    // Estado S7
     else {
         char delim =c;
         avanzar();
         string lexema="";
         lexema += delim;
 
-        if (delim =='{')
+        if (delim=='{')
             return Token(LLAVE_IZQ, lexema, lineaInicio, columnaInicio);
 
-        if (delim == '}') 
+        if (delim=='}') 
             return Token(LLAVE_DER, lexema, lineaInicio, columnaInicio);
 
-        if (delim == ':') 
+        if (delim==':') 
             return Token(DOS_PUNTOS, lexema, lineaInicio, columnaInicio);
 
-        if (delim == ',') 
+        if (delim ==',') 
             return Token(COMA, lexema, lineaInicio, columnaInicio);
 
-        if (delim == ';') 
+        if (delim ==';') 
             return Token(PUNTO_COMA, lexema, lineaInicio, columnaInicio);
 
         gestorErrores->agregarErrorLexico(lexema, lineaInicio, columnaInicio, "Caracter no reconocido: '" + lexema + "'");
@@ -193,13 +191,14 @@ Token AnalizadorLexico::siguienteToken() {
 
 vector<Token> AnalizadorLexico::analizarTodo() {
     tokens.clear();
-    Token t;
+    Token tok;
     do {
-        t = siguienteToken();
-        if (t.tipo !=DESCONOCIDO) {
-            tokens.push_back(t);
+        tok = siguienteToken();
+        if (tok.tipo !=DESCONOCIDO) {
+            tokens.push_back(tok);
         }
-    } while (t.tipo != FIN_ARCHIVO);
+    }
+    while (tok.tipo != FIN_ARCHIVO);
     return tokens;
 }
 

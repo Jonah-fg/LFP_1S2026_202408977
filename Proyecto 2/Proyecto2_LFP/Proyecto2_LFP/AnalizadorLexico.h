@@ -19,9 +19,6 @@ private:
     char caracterActual();
     void avanzar();
     bool esFin();
-    bool esLetra(char c);
-    bool esDigito(char c);
-    bool esEspacio(char c);
     void saltarEspacios();
 
     Token siguienteToken();
