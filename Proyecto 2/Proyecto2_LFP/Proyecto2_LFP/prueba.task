@@ -1,0 +1,21 @@
+TABLERO "Proyecto LFP" {
+    COLUMNA "Por Ha cer" {
+        tarea: "Disenar AFD" {
+            prioridad: ALTA,
+            responsable: "Jorge",
+            fecha_limite: 2026-05-01
+        },
+        tarea: "Implementar Lexer" {
+            prioridad: ALTA,
+            responsable: "Maria",
+            fecha_limite: 2026-05-08
+        }
+    };
+    COLUMNA "En Progreso" {
+        tarea: "Disenar GUI" {
+            prioridad: MEDIA,
+            responsable: "Ana",
+            fecha_limite: 2026-05-05
+        }
+    };
+}

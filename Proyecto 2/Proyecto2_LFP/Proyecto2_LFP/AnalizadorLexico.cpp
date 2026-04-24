@@ -54,8 +54,8 @@ Token AnalizadorLexico::siguienteToken() {
     // Estado S0
     if (isalpha(c)) {
         string lexema="";
-        while (!esFin() && (isalpha(caracterActual()) || isdigit(caracterActual()))) {
-            lexema +=caracterActual();
+        while (!esFin() && (isalpha(caracterActual()) || isdigit(caracterActual()) || caracterActual() == '_')) {
+            lexema+=caracterActual();
             avanzar();
         }
 

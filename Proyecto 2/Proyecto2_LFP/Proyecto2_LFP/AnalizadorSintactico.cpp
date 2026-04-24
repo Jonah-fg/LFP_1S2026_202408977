@@ -32,7 +32,7 @@ bool AnalizadorSintactico::coincidir(TipoToken esperado) {
 }
 
 void AnalizadorSintactico::sincronizar() {
-    while (tokenActual().tipo != FIN_ARCHIVO && tokenActual().tipo != PUNTO_COMA && tokenActual().tipo != LLAVE_DER && tokenActual().tipo != COMA) {
+    while (tokenActual().tipo !=FIN_ARCHIVO && tokenActual().tipo != PUNTO_COMA && tokenActual().tipo != LLAVE_DER && tokenActual().tipo != COMA) {
         avanzar();
     }
 }
@@ -104,7 +104,7 @@ NodoArbol* AnalizadorSintactico::analizarListaColumnas() {
 NodoArbol* AnalizadorSintactico::analizarColumna() {
     NodoArbol* nodo =new NodoArbol("<columna>");
 
-    if (!coincidir(COLUMNA)) {
+    if (!coincidir(COLUMNA)){
         gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba 'COLUMNA'");
         sincronizar();
         return nodo;
@@ -220,5 +220,120 @@ NodoArbol* AnalizadorSintactico::analizarTarea(){
     }
     return nodo;
 }
+
+// <lista_atributos> ::= <atributo> <mas_atributos>
+NodoArbol* AnalizadorSintactico::analizarListaAtributos() {
+    NodoArbol* nodo = new NodoArbol("<lista_atributos>");
+
+    if (tokenActual().tipo !=PRIORIDAD && tokenActual().tipo != RESPONSABLE && tokenActual().tipo != FECHA_LIMITE) {
+        return nodo;
+    }
+
+    do {
+        if (tokenActual().tipo==COMA) {
+            nodo->agregarHijo(new NodoArbol(",", COMA));
+            avanzar();
+        }
+
+        NodoArbol* atributo = analizarAtributo();
+        if (atributo != NULL) {
+            nodo->agregarHijo(atributo);
+        }
+    } while (tokenActual().tipo == COMA || tokenActual().tipo == PRIORIDAD || tokenActual().tipo == RESPONSABLE || tokenActual().tipo == FECHA_LIMITE);
+
+    return nodo;
+}
+
+
+// <atributo> 
+NodoArbol* AnalizadorSintactico::analizarAtributo() {
+    NodoArbol* nodo = new NodoArbol("<atributo>");
+    TipoToken tipoAtributo = tokenActual().tipo;
+
+    if (tipoAtributo == PRIORIDAD) {
+        nodo->agregarHijo(new NodoArbol("prioridad", PRIORIDAD));
+        avanzar();
+
+        if (!coincidir(DOS_PUNTOS)) {
+            gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba ':'");
+        }
+        else {
+            nodo->agregarHijo(new NodoArbol(":", DOS_PUNTOS));
+        }
+
+        NodoArbol* prio=analizarPrioridad();
+        if (prio !=NULL) {
+            nodo->agregarHijo(prio);
+        }
+    }
+    else if (tipoAtributo==RESPONSABLE) {
+        nodo->agregarHijo(new NodoArbol("responsable", RESPONSABLE));
+        avanzar();
+
+        if (!coincidir(DOS_PUNTOS)) {
+            gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba ':'");
+        }
+        else {
+            nodo->agregarHijo(new NodoArbol(":", DOS_PUNTOS));
+        }
+
+        if (tokenActual().tipo !=CADENA) {
+            gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba CADENA");
+        }
+        else {
+            nodo->agregarHijo(new NodoArbol(tokenActual().lexema,CADENA));
+            avanzar();
+        }
+    }
+    else if (tipoAtributo==FECHA_LIMITE) {
+        nodo->agregarHijo(new NodoArbol("fecha_limite", FECHA_LIMITE));
+        avanzar();
+
+        if (!coincidir(DOS_PUNTOS)) {
+            gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba ':'");
+        }
+        else {
+            nodo->agregarHijo(new NodoArbol(":", DOS_PUNTOS));
+        }
+        if (tokenActual().tipo!= FECHA) {
+            gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba FECHA (AAAA-MM-DD)");
+        }
+        else {
+            nodo->agregarHijo(new NodoArbol(tokenActual().lexema, FECHA));
+            avanzar();
+        }
+    }
+    else {
+        gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba 'prioridad', 'responsble' o 'fecha_limite'");
+        sincronizar();
+    }
+    return nodo;
+}
+
+
+// <prioridad> ::=ALTA | MEDIA | BAJA
+NodoArbol* AnalizadorSintactico::analizarPrioridad() {
+    NodoArbol* nodo = new NodoArbol("<prioridad>");
+    TipoToken tipo =tokenActual().tipo;
+
+    if (tipo ==ALTA || tipo==MEDIA || tipo== BAJA) {
+        nodo->agregarHijo(new NodoArbol(tokenActual().lexema, tipo));
+        avanzar();
+    }
+    else {
+        gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba ALTA, MEDIA o BAJA");
+    }
+    return nodo;
+}
+
+NodoArbol* AnalizadorSintactico::analizar() {
+    raiz= analizarPrograma();
+    return raiz;
+}
+
+NodoArbol* AnalizadorSintactico::obtenerRaiz() {
+    return raiz;
+}
+
 
 
