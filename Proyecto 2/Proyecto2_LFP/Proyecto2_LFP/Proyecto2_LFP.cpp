@@ -5,6 +5,7 @@
 #include "AnalizadorSintactico.h"
 #include "GestorErrores.h"
 #include "NodoArbol.h"
+#include "GeneradorReportes.h"
 using namespace std;
 
 void imprimirTokens(vector<Token> tokens) {
@@ -64,6 +65,17 @@ int main() {
     // Analisis sintactico
     AnalizadorSintactico sintactico(tokens, &gestor);
     NodoArbol* raiz=sintactico.analizar();
+
+    cout << "\nGenerando reportes...\n";
+
+    GeneradorReportes::generarReporteKanban(tokens, "reporte_kanban.html");
+    cout << " - Reporte Kanban: reporte_kanban.html\n";
+    GeneradorReportes::generarReporteCarga(tokens, "reporte_carga.html");
+    cout << " - Reporte Carga: reporte_carga.html\n";
+    GeneradorReportes::generarReporteTareasFechas(tokens, "reporte_tareas_fechas.html");
+    cout << " - Reporte Tareas y Fechas: reporte_tareas_fechas.html\n";
+    GeneradorReportes::generarArbolDot(raiz, "arbol.dot");
+    cout << " - Árbol DOT: arbol.dot\n";
 
     cout << "\n--- Arbol de derivaciion ---\n";
     imprimirArbol(raiz, 0);

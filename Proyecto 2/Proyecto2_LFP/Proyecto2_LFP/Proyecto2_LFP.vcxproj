@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClCompile Include="AnalizadorLexico.cpp" />
     <ClCompile Include="AnalizadorSintactico.cpp" />
+    <ClCompile Include="GeneradorReportes.cpp" />
     <ClCompile Include="GestorErrores.cpp" />
     <ClCompile Include="NodoArbol.cpp" />
     <ClCompile Include="Proyecto2_LFP.cpp" />
@@ -137,6 +138,7 @@
   <ItemGroup>
     <ClInclude Include="AnalizadorLexico.h" />
     <ClInclude Include="AnalizadorSintactico.h" />
+    <ClInclude Include="GeneradorReportes.h" />
     <ClInclude Include="GestorErrores.h" />
     <ClInclude Include="NodoArbol.h" />
     <ClInclude Include="Token.h" />
