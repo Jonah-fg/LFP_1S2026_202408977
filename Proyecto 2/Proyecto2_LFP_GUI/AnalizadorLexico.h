@@ -20,6 +20,7 @@ private:
     void avanzar();
     bool esFin();
     void saltarEspacios();
+    void retroceder();
 
     Token siguienteToken();
 

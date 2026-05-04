@@ -1,5 +1,5 @@
 TABLERO "Proyecto LFP" {
-    COLUMNA "Por Ha cer" {
+    COLUMNA "Por Hacer" {
         tarea: "Disenar AFD" {
             prioridad: ALTA,
             responsable: "Jorge",
@@ -18,4 +18,4 @@ TABLERO "Proyecto LFP" {
             fecha_limite: 2026-05-05
         }
     };
-}
+}; 

@@ -1,0 +1,6 @@
+TABLERO "P" {
+    COLUMNA "C" {
+        tarea: "T1" [prioridad: ALTA, responsable: "Ana", fecha_limite: 2026-05-01],
+        tarea: "T2" [prioridad: BAJA, responsable: "Pedro", fecha_limite: 2026-06-01],
+    };
+};

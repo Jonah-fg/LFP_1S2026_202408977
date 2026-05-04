@@ -16,7 +16,7 @@ Token AnalizadorSintactico::tokenActual() {
     return Token(FIN_ARCHIVO, "EOF", -1, -1);
 }
 
-void AnalizadorSintactico::avanzar() 
+void AnalizadorSintactico::avanzar()
 {
     if (indiceActual<tokens.size()) {
         indiceActual++;
@@ -43,11 +43,9 @@ NodoArbol* AnalizadorSintactico::analizarPrograma() {
 
     if (!coincidir(TABLERO)) {
         gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba 'TABLERO'");
-        sincronizar();
+        return nodo;
     }
-    else{
-        nodo->agregarHijo(new NodoArbol("TABLERO", TABLERO));
-    }
+    nodo->agregarHijo(new NodoArbol("TABLERO", TABLERO));
 
     if (tokenActual().tipo !=CADENA) {
         gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba una CADENA");
@@ -62,7 +60,7 @@ NodoArbol* AnalizadorSintactico::analizarPrograma() {
         gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba '{'");
         sincronizar();
     }
-    else {
+    else{
         nodo->agregarHijo(new NodoArbol("{", LLAVE_IZQ));
     }
 
@@ -73,6 +71,7 @@ NodoArbol* AnalizadorSintactico::analizarPrograma() {
 
     if (!coincidir(LLAVE_DER)) {
         gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba '}'");
+        sincronizar();
     }
     else {
         nodo->agregarHijo(new NodoArbol("}", LLAVE_DER));
@@ -199,71 +198,97 @@ NodoArbol* AnalizadorSintactico::analizarTarea(){
         avanzar();
     }
 
-    if (!coincidir(LLAVE_IZQ)) {
-        gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba '{'");
+    if (!coincidir(CORCHETE_IZQ)) {
+        gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba '['");
         sincronizar();
         return nodo;
     }
-    nodo->agregarHijo(new NodoArbol("{", LLAVE_IZQ));
+    nodo->agregarHijo(new NodoArbol("[", CORCHETE_IZQ));
 
     NodoArbol* atributos=analizarListaAtributos();
     if (atributos !=NULL) {
         nodo->agregarHijo(atributos);
     }
 
-    if (!coincidir(LLAVE_DER)) {
-        gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea,
-            tokenActual().columna, "Se esperba '}'");
+    if (!coincidir(CORCHETE_DER)) {
+        gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba ']'");
     }
-    else {
-        nodo->agregarHijo(new NodoArbol("}", LLAVE_DER));
+    else{
+        nodo->agregarHijo(new NodoArbol("]", CORCHETE_DER));
     }
     return nodo;
+
 }
+
 
 // <lista_atributos> ::= <atributo> <mas_atributos>
 NodoArbol* AnalizadorSintactico::analizarListaAtributos() {
     NodoArbol* nodo = new NodoArbol("<lista_atributos>");
 
-    if (tokenActual().tipo !=PRIORIDAD && tokenActual().tipo != RESPONSABLE && tokenActual().tipo != FECHA_LIMITE) {
+    if (tokenActual().tipo != PRIORIDAD &&
+        tokenActual().tipo != RESPONSABLE &&
+        tokenActual().tipo != FECHA_LIMITE) {
         return nodo;
     }
 
     do {
-        if (tokenActual().tipo==COMA) {
+        if (tokenActual().tipo == COMA) {
             nodo->agregarHijo(new NodoArbol(",", COMA));
             avanzar();
         }
 
-        NodoArbol* atributo = analizarAtributo();
-        if (atributo != NULL) {
-            nodo->agregarHijo(atributo);
+        if (tokenActual().tipo == PRIORIDAD ||
+            tokenActual().tipo == RESPONSABLE ||
+            tokenActual().tipo == FECHA_LIMITE) {
+            NodoArbol* attr = analizarAtributo();
+            if (attr != NULL) {
+                nodo->agregarHijo(attr);
+            }
+        } else if (tokenActual().tipo == CORCHETE_DER || tokenActual().tipo == FIN_ARCHIVO) {
+            break;
+        } else {
+            // Token desconocido
+            gestorErrores->agregarErrorSintactico(tokenActual().lexema,
+                                                  tokenActual().linea,
+                                                  tokenActual().columna,
+                                                  "Se esperaba 'prioridad', 'responsable' o 'fecha_limite'");
+            while (tokenActual().tipo != COMA &&
+                   tokenActual().tipo != CORCHETE_DER &&
+                   tokenActual().tipo != FIN_ARCHIVO) {
+                avanzar();
+            }
         }
-    } while (tokenActual().tipo == COMA || tokenActual().tipo == PRIORIDAD || tokenActual().tipo == RESPONSABLE || tokenActual().tipo == FECHA_LIMITE);
+    } while (tokenActual().tipo == COMA ||
+             tokenActual().tipo == PRIORIDAD ||
+             tokenActual().tipo == RESPONSABLE ||
+             tokenActual().tipo == FECHA_LIMITE);
 
     return nodo;
 }
 
 
-// <atributo> 
+// <atributo> ::= PRIORIDAD DOS_PUNTOS <prioridad> | RESPONSABLE DOS_PUNTOS CADENA | FECHA_LIMITE DOS_PUNTOS FECHA
 NodoArbol* AnalizadorSintactico::analizarAtributo() {
-    NodoArbol* nodo = new NodoArbol("<atributo>");
+    NodoArbol* nodo=new NodoArbol("<atributo>");
     TipoToken tipoAtributo = tokenActual().tipo;
 
-    if (tipoAtributo == PRIORIDAD) {
+    if (tipoAtributo ==PRIORIDAD) {
         nodo->agregarHijo(new NodoArbol("prioridad", PRIORIDAD));
         avanzar();
 
         if (!coincidir(DOS_PUNTOS)) {
             gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba ':'");
+            if (tokenActual().tipo==ALTA || tokenActual().tipo == MEDIA || tokenActual().tipo == BAJA) {
+                avanzar();
+            }
         }
         else {
             nodo->agregarHijo(new NodoArbol(":", DOS_PUNTOS));
-        }
 
-        NodoArbol* prio=analizarPrioridad();
-        if (prio !=NULL) {
-            nodo->agregarHijo(prio);
+            NodoArbol* prio=analizarPrioridad();
+            if (prio != NULL) {
+                nodo->agregarHijo(prio);
+            }
         }
     }
     else if (tipoAtributo==RESPONSABLE) {
@@ -272,17 +297,19 @@ NodoArbol* AnalizadorSintactico::analizarAtributo() {
 
         if (!coincidir(DOS_PUNTOS)) {
             gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba ':'");
+            if (tokenActual().tipo ==CADENA) {
+                avanzar();
+            }
         }
         else {
             nodo->agregarHijo(new NodoArbol(":", DOS_PUNTOS));
-        }
-
-        if (tokenActual().tipo !=CADENA) {
-            gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba CADENA");
-        }
-        else {
-            nodo->agregarHijo(new NodoArbol(tokenActual().lexema,CADENA));
-            avanzar();
+            if (tokenActual().tipo !=CADENA) {
+                gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba CADENA");
+            }
+            else{
+                nodo->agregarHijo(new NodoArbol(tokenActual().lexema, CADENA));
+                avanzar();
+            }
         }
     }
     else if (tipoAtributo==FECHA_LIMITE) {
@@ -291,21 +318,25 @@ NodoArbol* AnalizadorSintactico::analizarAtributo() {
 
         if (!coincidir(DOS_PUNTOS)) {
             gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba ':'");
+            if (tokenActual().tipo==FECHA) {
+                avanzar();
+            }
         }
         else {
             nodo->agregarHijo(new NodoArbol(":", DOS_PUNTOS));
-        }
-        if (tokenActual().tipo!= FECHA) {
-            gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba FECHA (AAAA-MM-DD)");
-        }
-        else {
-            nodo->agregarHijo(new NodoArbol(tokenActual().lexema, FECHA));
-            avanzar();
+            // Solo verificamos el valor si sí había ":"
+            if (tokenActual().tipo!=FECHA) {
+                gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba FECHA (AAAA-MM-DD)");
+            }
+            else{
+                nodo->agregarHijo(new NodoArbol(tokenActual().lexema, FECHA));
+                avanzar();
+            }
         }
     }
     else {
         gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba 'prioridad', 'responsble' o 'fecha_limite'");
-        sincronizar();
+        avanzar();
     }
     return nodo;
 }

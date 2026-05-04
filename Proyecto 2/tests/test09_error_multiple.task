@@ -1,0 +1,5 @@
+TABLERO "X" {
+    COLUMNA "Y" {
+        tarea: "Z" [prioridad: ALTA, responsable "Ana", fecha_limite: 2026-07-01]
+    }
+}

@@ -6,20 +6,134 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>1136</width>
+    <height>713</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTextEdit" name="editorCodigo">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>130</y>
+      <width>851</width>
+      <height>181</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QTableWidget" name="tablaTokens">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>360</y>
+      <width>391</width>
+      <height>261</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QTableWidget" name="tablaErrores">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>360</y>
+      <width>391</width>
+      <height>261</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btonCargar">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>80</y>
+      <width>90</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Cargar</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btonAnalizar">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>80</y>
+      <width>90</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Analizar</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btonReportes">
+    <property name="geometry">
+     <rect>
+      <x>840</x>
+      <y>80</y>
+      <width>90</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Reportes</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>340</y>
+      <width>91</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Tabla Tokens</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>340</y>
+      <width>101</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Tabla Errores</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>20</y>
+      <width>231</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>TaskScript</string>
+    </property>
+   </widget>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>1136</width>
      <height>25</height>
     </rect>
    </property>

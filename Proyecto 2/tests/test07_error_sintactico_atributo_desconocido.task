@@ -1,0 +1,5 @@
+TABLERO "P" {
+    COLUMNA "C" {
+        tarea: "T" [color: "rojo", prioridad: BAJA, responsable: "Juan", fecha_limite: 2026-05-10]
+    };
+};

@@ -2,12 +2,12 @@
 using namespace std;
 
 EntradaError::EntradaError() {
-    numero = 0;
-    lexemaOToken = "";
+    numero=0;
+    lexemaOToken= "";
     tipo = "";
-    descripcion = "";
-    linea = 0;
-    columna = 0;
+    descripcion= "";
+    linea =0;
+    columna =0;
 }
 
 EntradaError::EntradaError(int num, string lex, string tip, string desc, int lin, int col) {

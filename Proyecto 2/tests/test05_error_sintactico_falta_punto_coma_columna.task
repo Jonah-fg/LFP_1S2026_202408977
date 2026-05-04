@@ -1,0 +1,8 @@
+TABLERO "Proyecto" {
+    COLUMNA "Activo" {
+        tarea: "Primera tarea" [prioridad: ALTA, responsable: "Juan", fecha_limite: 2026-05-01]
+    }                               
+    COLUMNA "Completado" {
+        tarea: "Segunda tarea" [prioridad: BAJA, responsable: "Ana", fecha_limite: 2026-06-01]
+    };
+};

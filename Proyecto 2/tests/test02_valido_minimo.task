@@ -1,0 +1,5 @@
+TABLERO "Test" {
+    COLUMNA "To Do" {
+        tarea: "T1" [prioridad: ALTA]
+    };
+};

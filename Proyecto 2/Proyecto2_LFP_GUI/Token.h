@@ -24,6 +24,8 @@ enum TipoToken {
 
     LLAVE_IZQ,
     LLAVE_DER,
+    CORCHETE_IZQ,
+    CORCHETE_DER,
     DOS_PUNTOS,
     COMA,
     PUNTO_COMA,
@@ -31,6 +33,8 @@ enum TipoToken {
     FIN_ARCHIVO,
     DESCONOCIDO
 };
+
+string tipoTokenToString(TipoToken tipo);
 
 class Token {
 public:

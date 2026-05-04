@@ -40,6 +40,19 @@ void AnalizadorLexico::saltarEspacios() {
     }
 }
 
+void AnalizadorLexico::retroceder() {
+    if (pos > 0) {
+        pos--;
+        if (fuente[pos]== '\n') {
+            linea--;
+            columna=1;
+        }
+        else{
+            columna--;
+        }
+    }
+}
+
 Token AnalizadorLexico::siguienteToken() {
     saltarEspacios();
 
@@ -154,10 +167,14 @@ Token AnalizadorLexico::siguienteToken() {
         }
 
         if (esFin() || caracterActual()== '\n') {
+            if (!lexema.empty() && lexema.back()!='"') {
+                lexema.pop_back();
+                retroceder();
+            }
             gestorErrores->agregarErrorLexico(lexema, lineaInicio, columnaInicio, "Cadena sin cerrar antes de fin de linea");
             return Token(DESCONOCIDO, lexema, lineaInicio, columnaInicio);
         }
-        lexema += '"';
+        lexema +='"';
         avanzar(); 
         return Token(CADENA, lexema, lineaInicio, columnaInicio);
     }
@@ -167,7 +184,7 @@ Token AnalizadorLexico::siguienteToken() {
         char delim =c;
         avanzar();
         string lexema="";
-        lexema += delim;
+        lexema +=delim;
 
         if (delim=='{')
             return Token(LLAVE_IZQ, lexema, lineaInicio, columnaInicio);
@@ -183,6 +200,11 @@ Token AnalizadorLexico::siguienteToken() {
 
         if (delim ==';') 
             return Token(PUNTO_COMA, lexema, lineaInicio, columnaInicio);
+        if (delim == '[')
+            return Token(CORCHETE_IZQ, "[", lineaInicio, columnaInicio);
+
+        if (delim == ']')
+            return Token(CORCHETE_DER, "]", lineaInicio, columnaInicio);
 
         gestorErrores->agregarErrorLexico(lexema, lineaInicio, columnaInicio, "Caracter no reconocido: '" + lexema + "'");
         return Token(DESCONOCIDO, lexema, lineaInicio, columnaInicio);

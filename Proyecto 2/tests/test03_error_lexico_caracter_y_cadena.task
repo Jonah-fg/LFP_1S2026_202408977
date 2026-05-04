@@ -1,0 +1,5 @@
+TABLERO "Proyecto X" {
+    COLUMNA "Backlog" {
+        tarea: "Tarea @ importante" [prioridad: ALTA, responsable: "Juan]
+    };
+};

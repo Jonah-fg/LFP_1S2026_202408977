@@ -42,19 +42,24 @@ void GeneradorReportes::generarReporteKanban(vector<Token>& tokens, string nombr
                     string responsable= "";
                     string fecha ="";
 
-                    int k=j + 3; 
-                    while (k <tokens.size() && tokens[k].tipo != LLAVE_DER) {
-                        if (tokens[k].tipo==PRIORIDAD) {
-                            prioridad =tokens[k + 2].lexema; 
+                    int k=j + 3;
+                    if (k < tokens.size() && tokens[k].tipo == CORCHETE_IZQ) {
+                        k++;
+
+                        while (k <tokens.size() && tokens[k].tipo != CORCHETE_DER) {
+                            if (tokens[k].tipo==PRIORIDAD) {
+                                prioridad =tokens[k + 2].lexema;
+                            }
+                            else if (tokens[k].tipo ==RESPONSABLE) {
+                                responsable= tokens[k + 2].lexema;
+                                responsable = responsable.substr(1, responsable.length() - 2);
+                            }
+                            else if (tokens[k].tipo== FECHA_LIMITE) {
+                                fecha =tokens[k+2].lexema;
+                            }
+                            ++k;
                         }
-                        else if (tokens[k].tipo ==RESPONSABLE) {
-                            responsable= tokens[k + 2].lexema;
-                            responsable = responsable.substr(1, responsable.length() - 2);
-                        }
-                        else if (tokens[k].tipo== FECHA_LIMITE) {
-                            fecha =tokens[k + 2].lexema;
-                        }
-                        ++k;
+                        j =k;
                     }
 
                     string clasePrioridad= "prioridad-baja";
@@ -113,15 +118,18 @@ void GeneradorReportes::generarReporteCarga(vector<Token>& tokens, string nombre
             string resp ="";
             string prior ="";
             size_t j=i + 3;
-            while (j< tokens.size() && tokens[j].tipo != LLAVE_DER) {
-                if (tokens[j].tipo ==RESPONSABLE) {
-                    resp =tokens[j + 2].lexema;
-                    resp =resp.substr(1, resp.length() - 2);
+            if (j < tokens.size() && tokens[j].tipo== CORCHETE_IZQ) {
+                j++;
+                while (j< tokens.size() && tokens[j].tipo != CORCHETE_DER) {
+                    if (tokens[j].tipo ==RESPONSABLE) {
+                        resp =tokens[j + 2].lexema;
+                        resp =resp.substr(1, resp.length() - 2);
+                    }
+                    else if (tokens[j].tipo==PRIORIDAD) {
+                        prior =tokens[j + 2].lexema;
+                    }
+                    ++j;
                 }
-                else if (tokens[j].tipo==PRIORIDAD) {
-                    prior =tokens[j + 2].lexema;
-                }
-                ++j;
             }
             if (!resp.empty()) {
                 total[resp]++;
@@ -177,16 +185,19 @@ void GeneradorReportes::generarReporteTareasFechas(vector<Token>& tokens, string
             string nombreTarea =tokens[i + 2].lexema;
             string responsable="";
             string fecha ="";
-            size_t j = i+3;
-            while (j < tokens.size() && tokens[j].tipo != LLAVE_DER) {
-                if (tokens[j].tipo==RESPONSABLE) {
-                    responsable=tokens[j + 2].lexema;
-                    responsable= responsable.substr(1, responsable.length() - 2);
+            size_t j =i+3;
+            if (j < tokens.size() && tokens[j].tipo==CORCHETE_IZQ) {
+                j++;
+                while (j < tokens.size() && tokens[j].tipo !=CORCHETE_DER) {
+                    if (tokens[j].tipo==RESPONSABLE) {
+                        responsable=tokens[j + 2].lexema;
+                        responsable= responsable.substr(1, responsable.length() - 2);
+                    }
+                    else if (tokens[j].tipo== FECHA_LIMITE) {
+                        fecha =tokens[j + 2].lexema;
+                    }
+                    ++j;
                 }
-                else if (tokens[j].tipo== FECHA_LIMITE) {
-                    fecha =tokens[j + 2].lexema;
-                }
-                ++j;
             }
             archivo << "<tr><td>" << nombreTarea << "</td><td>" << (responsable.empty() ? "-" : responsable) << "</td><td>" << (fecha.empty() ? "-" : fecha) << "</td></tr>";
         }
