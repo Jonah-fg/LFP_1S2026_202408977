@@ -28,5 +28,6 @@ public:
     AnalizadorLexico(string entrada, GestorErrores* gestor);
     vector<Token> analizarTodo();
     vector<Token> obtenerTokens();
+    bool esCaracterProhibidoEnCadena(char c);
 };
 #endif

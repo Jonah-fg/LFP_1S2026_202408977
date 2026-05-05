@@ -30,6 +30,11 @@ void AnalizadorLexico::avanzar() {
     }
 }
 
+bool AnalizadorLexico::esCaracterProhibidoEnCadena(char c) {
+    string prohibidos = "@$&^|!#~";
+    return prohibidos.find(c)!=string::npos;
+}
+
 bool AnalizadorLexico::esFin() {
     return pos>=fuente.length();
 }
@@ -162,7 +167,14 @@ Token AnalizadorLexico::siguienteToken() {
         avanzar(); 
 
         while (!esFin() && caracterActual() !='"' && caracterActual() != '\n') {
-            lexema+=caracterActual();
+            char actual =caracterActual();
+            if (esCaracterProhibidoEnCadena(actual)) {
+                string simbolo(1, actual);
+                gestorErrores->agregarErrorLexico(simbolo, linea, columna, "Caracter no valido dentro de cadena: '" + simbolo + "'");
+                avanzar();
+                continue;
+            }
+            lexema+=actual;
             avanzar();
         }
 

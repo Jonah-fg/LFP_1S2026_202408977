@@ -161,6 +161,9 @@ NodoArbol* AnalizadorSintactico::analizarListaTareas() {
         if (tokenActual().tipo== COMA) {
             nodo->agregarHijo(new NodoArbol(",", COMA));
             avanzar();
+            if (tokenActual().tipo!=TAREA) {
+                break;
+            }
         }
         NodoArbol* tarea =analizarTarea();
         if (tarea != NULL) {
@@ -200,10 +203,15 @@ NodoArbol* AnalizadorSintactico::analizarTarea(){
 
     if (!coincidir(CORCHETE_IZQ)) {
         gestorErrores->agregarErrorSintactico(tokenActual().lexema, tokenActual().linea, tokenActual().columna, "Se esperaba '['");
-        sincronizar();
-        return nodo;
+        if (tokenActual().tipo==PRIORIDAD || tokenActual().tipo == RESPONSABLE || tokenActual().tipo ==FECHA_LIMITE) {
+        }
+        else{
+            return nodo;
+        }
     }
-    nodo->agregarHijo(new NodoArbol("[", CORCHETE_IZQ));
+    else{
+        nodo->agregarHijo(new NodoArbol("[", CORCHETE_IZQ));
+    }
 
     NodoArbol* atributos=analizarListaAtributos();
     if (atributos !=NULL) {

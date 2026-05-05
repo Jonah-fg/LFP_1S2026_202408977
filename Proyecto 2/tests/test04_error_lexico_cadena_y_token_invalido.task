@@ -1,5 +1,5 @@
 TABLERO "Principal {
     COLUMNA "En Espera" {
-        tarea: "Revisar documentacion" [prioridad: MEDIA, responsable: "Luis", fecha_limite: 2026-06-01, XYZ: "desconocido"]
+        tarea: "Revisar documentacion" [prioridad: MEDIA, responsable: "Luis", fecha_limite: 2026-06-01, XYZ: "desconocido"],
     };
 };

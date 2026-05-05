@@ -14,6 +14,7 @@ using namespace std;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
+    ultimaRaiz =NULL;
 
     // Conectar botones con sus funciones
     connect(ui->btonCargar, &QPushButton::clicked, this, &MainWindow::cargarArchivo);
@@ -22,6 +23,9 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 MainWindow::~MainWindow() {
+    if (ultimaRaiz!= NULL) {
+        delete ultimaRaiz;
+    }
     delete ui;
 }
 
@@ -40,7 +44,6 @@ void MainWindow::cargarArchivo() {
 }
 
 void MainWindow::analizar() {
-    // Obtener texto del editor
     string entrada=ui->editorCodigo->toPlainText().toStdString();
 
     // Limpiar tablas anteriores
@@ -57,7 +60,6 @@ void MainWindow::analizar() {
     AnalizadorLexico lexico(entrada, &gestor);
     vector<Token> tokens =lexico.analizarTodo();
 
-    // Llenar tabla de tokens
     for (size_t i =0; i<tokens.size(); ++i) {
         Token &t = tokens[i];
         int fila =ui->tablaTokens->rowCount();
@@ -86,20 +88,37 @@ void MainWindow::analizar() {
         ui->tablaErrores->setItem(fila, 4, new QTableWidgetItem(QString("L:%1 C:%2").arg(e.linea).arg(e.columna)));
     }
 
-    // Generar reportes si no hay errores (automático)
-    if (errores.empty()) {
-        GeneradorReportes::generarReporteKanban(tokens, "reporte_kanban.html");
-        GeneradorReportes::generarReporteCarga(tokens, "reporte_carga.html");
-        GeneradorReportes::generarReporteTareasFechas(tokens, "reporte_tareas_fechas.html");
-        GeneradorReportes::generarArbolDot(raiz, "arbol.dot");
-        QMessageBox::information(this, "Éxito", "Análisis completado sin errores.\n" "Reportes generados:\n" "- reporte_kanban.html\n" "- reporte_carga.html\n" "- reporte_tareas_fechas.html\n" "- arbol.dot");
-    } else {
-        QMessageBox::warning(this, "Errores", "Se encontraron errores. No se generaron reportes.");
+    ultimosTokens= tokens;
+    if (ultimaRaiz!=NULL) {
+        delete ultimaRaiz;
     }
-    delete raiz;
+    ultimaRaiz=raiz;
+
+    if (errores.empty()) {
+        QMessageBox::information(this, "Éxito", "Análisis completado sin errres.\n" "Presione 'Generar Reprtes' para crear los archivos.");
+    }
+    else {
+        QMessageBox::warning(this, "Erores", "Se encontraron errores. No se pueden generar reportes.");
+        delete ultimaRaiz;
+        ultimaRaiz=NULL;
+    }
 }
 
 void MainWindow::generarReportes() {
-    // Puedes reutilizar la función analizar() o pedir que primero se analice.
-    analizar();
+    if (ultimosTokens.empty()) {
+        analizar();
+    }
+
+    // Verificamos que haya datos válidos y sin errores
+    if (ultimaRaiz ==NULL) {
+        QMessageBox::warning(this, "Error", "No hay un análisis válido.\n" "Analice un archivo sin errores primero.");
+        return;
+    }
+
+    GeneradorReportes::generarReporteKanban(ultimosTokens, "reporte_kanban.html");
+    GeneradorReportes::generarReporteCarga(ultimosTokens, "reporte_carga.html");
+    GeneradorReportes::generarReporteTareasFechas(ultimosTokens, "reporte_tareas_fechas.html");
+    GeneradorReportes::generarArbolDot(ultimaRaiz, "arbol.dot");
+
+    QMessageBox::information(this, "Reportes", "Reportes generados correctamente:\n" "- repote_kanban.html\n"  "- reporte_carga.html\n" "- reporte_tareas_fechas.html\n" "- arbol.dot");
 }

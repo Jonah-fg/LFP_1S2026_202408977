@@ -1,11 +1,11 @@
-TABLERO "Proyecto LFP" {
+TABLERO "Proyecto Final LFP" {
     COLUMNA "Por Hacer" {
-        tarea: "Diseñar AFD" [prioridad: ALTA, responsable: "Jorge", fecha_limite: 2026-05-01],
+        tarea: "Disenar AFD" [prioridad: ALTA, responsable: "Jorge", fecha_limite: 2026-05-01],
         tarea: "Implementar Lexer" [prioridad: ALTA, responsable: "Maria", fecha_limite: 2026-05-08],
         tarea: "Escribir pruebas unitarias" [prioridad: MEDIA, responsable: "Carlos", fecha_limite: 2026-05-10],
     };
     COLUMNA "En Progreso" {
-        tarea: "Diseñar GUI" [prioridad: MEDIA, responsable: "Ana", fecha_limite: 2026-05-05],
+        tarea: "Disenar GUI" [prioridad: MEDIA, responsable: "Ana", fecha_limite: 2026-05-05],
         tarea: "Configurar GitHub" [prioridad: BAJA, responsable: "Pedro", fecha_limite: 2026-04-18],
     };
     COLUMNA "Completado" {

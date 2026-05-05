@@ -1,5 +1,5 @@
 TABLERO "P" {
     COLUMNA "C" {
-        tarea: "T" [prioridad ALTA, responsable: "Ana", fecha_limite: 2026-05-05]
+        tarea: "T" [prioridad ALTA, responsable: "Ana", fecha_limite: 2026-05-05],
     };
 };

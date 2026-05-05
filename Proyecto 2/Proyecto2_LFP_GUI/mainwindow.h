@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "NodoArbol.h"
+#include "Token.h"
 #include <QMainWindow>
 
 // Declaraciones adelantadas
@@ -21,6 +23,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    std::vector<Token> ultimosTokens;
+    NodoArbol* ultimaRaiz;
 };
 
 #endif
